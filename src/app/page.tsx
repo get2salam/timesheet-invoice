@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { FileDown, FileSpreadsheet, Eye, Upload, RefreshCw, CheckCircle } from 'lucide-react';
+import { FileDown, FileSpreadsheet, Eye, Upload, RefreshCw, CheckCircle, PenLine } from 'lucide-react';
 import FileUploader from '@/components/FileUploader';
 import ShiftEditor from '@/components/ShiftEditor';
 import InvoicePreview from '@/components/InvoicePreview';
@@ -59,13 +59,21 @@ export default function Home() {
       if (parsed.shifts.length > 0) { setShifts(parsed.shifts); setOcrStatus('success'); }
       else {
         setOcrStatus('error');
-        setShifts([{ id: generateId(), description: 'Protec 3', date: new Date().toISOString().split('T')[0], startTime: '06:00', endTime: '18:00', hours: 12, otHours: 2, rate: RATES.dailyRate, amount: RATES.dailyRate + (2 * RATES.otRate) }]);
+        startManualEntry();
       }
       URL.revokeObjectURL(imageUrl);
     } catch (error) {
       setOcrStatus('error');
-      setShifts([{ id: generateId(), description: 'Protec 3', date: new Date().toISOString().split('T')[0], startTime: '06:00', endTime: '18:00', hours: 12, otHours: 2, rate: RATES.dailyRate, amount: RATES.dailyRate + (2 * RATES.otRate) }]);
+      startManualEntry();
     } finally { setIsProcessing(false); }
+  };
+
+  const startManualEntry = () => {
+    const today = new Date().toISOString().split('T')[0];
+    setShifts([
+      { id: generateId(), description: 'Protec 3', date: today, startTime: '06:00', endTime: '18:00', hours: 12, otHours: 2, rate: RATES.dailyRate, amount: RATES.dailyRate + (2 * RATES.otRate) }
+    ]);
+    setOcrStatus('idle');
   };
 
   const handleDownloadPDF = () => downloadPDF(invoiceData, `hfs_invoice_${invoiceNumber.replace('/', '_')}`);
@@ -95,6 +103,19 @@ export default function Home() {
               <p className="text-gray-600">Take a photo or upload an image of your timesheet.</p>
             </div>
             <FileUploader onFileSelect={processTimesheet} isProcessing={isProcessing} />
+            
+            <div className="mt-6 text-center">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-300"></div></div>
+                <div className="relative flex justify-center text-sm"><span className="px-4 bg-gray-50 text-gray-500">OR</span></div>
+              </div>
+              <button onClick={startManualEntry} className="mt-6 flex items-center justify-center gap-2 w-full px-6 py-3 text-medium-blue font-medium border-2 border-medium-blue rounded-xl hover:bg-light-blue transition-colors">
+                <PenLine className="w-5 h-5" />
+                Enter Shifts Manually
+              </button>
+              <p className="mt-2 text-sm text-gray-500">Best for handwritten timesheets</p>
+            </div>
+
             {ocrStatus === 'error' && (<div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg"><p className="text-sm text-yellow-800"><strong>Note:</strong> Could not detect shifts automatically. Please enter manually.</p></div>)}
           </div>
         ) : (
