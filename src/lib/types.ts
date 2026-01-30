@@ -30,6 +30,10 @@ export interface CompanyDetails {
   phone: string;
   email: string;
   utr: string;
+  bankName: string;
+  accountName: string;
+  accountNumber: string;
+  sortCode: string;
 }
 
 export interface ClientDetails {
@@ -47,6 +51,10 @@ export const COMPANY_DETAILS: CompanyDetails = {
   phone: '07429175660',
   email: 'vickycbr8@gmail.com',
   utr: '7038050927',
+  bankName: 'Starling',
+  accountName: 'Ahmed Waqas',
+  accountNumber: '42071515',
+  sortCode: '60-83-71',
 };
 
 export const CLIENT_DETAILS: ClientDetails = {
