@@ -132,17 +132,27 @@ export function generateInvoicePDF(data: InvoiceData): jsPDF {
   doc.setFontSize(14);
   doc.text(formatCurrency(data.grandTotal), pageWidth - margin - 3, totalsY + 21, { align: 'right' });
 
+  // Payment Details with Bank Info
+  const paymentY = totalsY + 35;
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8);
   doc.setTextColor(...mediumBlue);
-  doc.text('PAYMENT DETAILS', margin, totalsY + 35);
+  doc.text('PAYMENT DETAILS', margin, paymentY);
+
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   doc.setTextColor(...charcoal);
-  doc.text('Please make payment upon receipt of this invoice.', margin, totalsY + 40);
+  doc.text('Please make payment to:', margin, paymentY + 6);
+
+  doc.setFontSize(8);
+  doc.text(`Bank: ${COMPANY_DETAILS.bankName}`, margin, paymentY + 12);
+  doc.text(`Account Name: ${COMPANY_DETAILS.accountName}`, margin, paymentY + 17);
+  doc.text(`Account Number: ${COMPANY_DETAILS.accountNumber}`, margin, paymentY + 22);
+  doc.text(`Sort Code: ${COMPANY_DETAILS.sortCode}`, margin, paymentY + 27);
+
   doc.setFont('helvetica', 'italic');
   doc.setTextColor(...royalBlue);
-  doc.text('Thank you for your business!', margin, totalsY + 47);
+  doc.text('Thank you for your business!', margin, paymentY + 35);
 
   return doc;
 }
