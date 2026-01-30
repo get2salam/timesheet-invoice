@@ -80,33 +80,4 @@ export default function InvoicePreview({ data }: InvoicePreviewProps) {
             </tbody>
           </table>
         </div>
-        <p className="text-xs text-gray-500 italic mb-4">* Overtime (OT): Hours beyond {RATES.standardHours}hrs @ £{RATES.otRate}/hr</p>
-        <div className="flex justify-end">
-          <div className="w-64">
-            <div className="flex justify-between py-1 text-sm">
-              <span className="text-gray-500">Daily Total ({data.shifts.length} days)</span>
-              <span className="text-gray-700">{formatCurrency(data.dailyTotal)}</span>
-            </div>
-            <div className="flex justify-between py-1 text-sm">
-              <span className="text-gray-500">OT Total ({data.otHoursTotal} hrs)</span>
-              <span className="text-gray-700">{formatCurrency(data.otTotal)}</span>
-            </div>
-            <div className="flex justify-between py-1 text-sm">
-              <span className="text-gray-500">Tax (0%)</span>
-              <span className="text-gray-700">{formatCurrency(data.tax)}</span>
-            </div>
-            <div className="bg-royal-blue text-white rounded-lg p-3 mt-2 flex justify-between items-center">
-              <span className="font-semibold">TOTAL DUE</span>
-              <span className="text-xl font-bold">{formatCurrency(data.grandTotal)}</span>
-            </div>
-          </div>
-        </div>
-        <div className="mt-6 pt-4 border-t border-gray-200">
-          <p className="text-sm font-semibold text-medium-blue mb-1">PAYMENT DETAILS</p>
-          <p className="text-sm text-gray-600">Please make payment upon receipt of this invoice.</p>
-          <p className="text-sm italic text-royal-blue mt-2">Thank you for your business!</p>
-        </div>
-      </div>
-    </div>
-  );
-}
+        <p className="text-xs text-gray-500
