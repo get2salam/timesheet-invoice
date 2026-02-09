@@ -1,162 +1,151 @@
 # Timesheet Invoice Generator
 
-A professional web application for generating invoices from timesheet images. Built with Next.js 14, TypeScript, Tailwind CSS, and Tesseract.js for OCR.
+Convert timesheets to professional invoices with OCR — upload a photo of your timesheet and get a polished PDF or Excel invoice in seconds.
+
+![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue?logo=typescript)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.3-38bdf8?logo=tailwindcss)
+![License](https://img.shields.io/badge/License-MIT-green)
+
+---
 
 ## Features
 
-- 📸 **Upload Timesheet Images** - Drag & drop or click to upload timesheet photos
-- 🔍 **Automatic OCR** - Extracts shift dates, start/end times automatically using Tesseract.js
-- ✏️ **Manual Editing** - Review and edit all extracted data before generating invoice
-- 📊 **Overtime Calculation** - Automatic OT calculation for hours beyond 10hrs @ £14/hr
-- 📄 **PDF Export** - Generate professional PDF invoices
-- 📗 **Excel Export** - Generate Excel spreadsheets for record keeping
-- 🎨 **Professional Design** - Royal blue themed invoice matching your branding
+- 📸 **OCR Parsing** — Upload a timesheet image and automatically extract shift dates, start/end times using Tesseract.js
+- ✏️ **Shift Editing** — Review, add, edit, or remove extracted shift data before generating the invoice
+- 📄 **PDF Export** — Generate professional, branded PDF invoices ready to send
+- 📗 **Excel Export** — Download Excel spreadsheets for bookkeeping and records
+- ⏱️ **Overtime Calculation** — Automatic overtime detection and calculation based on configurable thresholds
+- ⚙️ **Customizable Settings** — Configure your company details, client info, rates, and invoice numbering
+- 🎨 **Professional Design** — Clean, modern UI with a royal-blue themed invoice layout
 
-## Pre-configured Details
+## Screenshots
 
-The application comes pre-configured with:
+> _Screenshots coming soon — run the app locally to see it in action._
 
-**Your Details:**
-- Name: AHMED WAQAS
-- Address: 103 Apple Tree Ave, Uxbridge, UB8 3PX
-- Phone: 07429175660
-- Email: vickycbr8@gmail.com
-- UTR: 7038050927
+## Tech Stack
 
-**Client:**
-- Heathrow Freight Services Ltd
-- 202 Parlaunt Road, Slough, SL3 8AZ
+| Layer       | Technology                          |
+| ----------- | ----------------------------------- |
+| Framework   | Next.js 14 (App Router)             |
+| Language    | TypeScript 5                        |
+| Styling     | Tailwind CSS 3                      |
+| OCR         | Tesseract.js                        |
+| PDF         | jsPDF + jspdf-autotable             |
+| Excel       | SheetJS (xlsx)                      |
+| Icons       | Lucide React                        |
 
-**Rates:**
-- Daily Rate: £140 (covers first 10 hours)
-- Overtime: £14/hr (for hours beyond 10)
+## Getting Started
 
-## Deployment to Vercel via StackBlitz
+### Prerequisites
 
-### Method 1: StackBlitz (Recommended)
+- **Node.js** 18+ (20 recommended)
+- **npm** 9+
 
-1. Go to [StackBlitz](https://stackblitz.com/)
-2. Click "Start a new project" → "Upload"
-3. Upload the entire `timesheet-invoice-app` folder
-4. Wait for dependencies to install
-5. Click the "Deploy" button in StackBlitz
-6. Connect your Vercel account
-7. Deploy!
-
-### Method 2: Direct Vercel Deployment
-
-1. Push the code to a GitHub repository
-2. Go to [Vercel](https://vercel.com/)
-3. Click "New Project"
-4. Import your GitHub repository
-5. Vercel will auto-detect Next.js settings
-6. Click "Deploy"
-
-### Method 3: Vercel CLI
+### Install & Run
 
 ```bash
-# Install Vercel CLI
-npm i -g vercel
+# Clone the repository
+git clone https://github.com/get2salam/timesheet-invoice.git
+cd timesheet-invoice
 
-# Navigate to project
-cd timesheet-invoice-app
-
-# Deploy
-vercel
-```
-
-## Local Development
-
-```bash
 # Install dependencies
 npm install
 
-# Run development server
+# Start the development server
 npm run dev
+```
 
-# Open http://localhost:3000
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Build for Production
+
+```bash
+npm run build
+npm start
+```
+
+### Docker
+
+```bash
+# Build and run with Docker Compose
+docker compose up --build
+
+# Or build manually
+docker build -t timesheet-invoice .
+docker run -p 3000:3000 timesheet-invoice
 ```
 
 ## Project Structure
 
 ```
-timesheet-invoice-app/
 ├── src/
 │   ├── app/
-│   │   ├── globals.css      # Global styles
-│   │   ├── layout.tsx       # Root layout
-│   │   └── page.tsx         # Main page component
+│   │   ├── globals.css          # Global styles
+│   │   ├── layout.tsx           # Root layout
+│   │   └── page.tsx             # Main page component
 │   ├── components/
-│   │   ├── FileUploader.tsx # Drag & drop upload
-│   │   ├── ShiftEditor.tsx  # Edit shift data
-│   │   ├── InvoicePreview.tsx # Live preview
-│   │   └── InvoiceSettings.tsx # Invoice number/date
+│   │   ├── FileUploader.tsx     # Drag & drop image upload
+│   │   ├── ShiftEditor.tsx      # Shift data table editor
+│   │   ├── InvoicePreview.tsx   # Live invoice preview
+│   │   └── InvoiceSettings.tsx  # Invoice number & date settings
 │   └── lib/
-│       ├── types.ts         # TypeScript types & constants
-│       ├── calculations.ts  # Business logic
-│       ├── ocr-parser.ts    # OCR text parsing
-│       ├── pdf-generator.ts # PDF generation
-│       └── excel-generator.ts # Excel generation
-├── package.json
-├── next.config.js
-├── tailwind.config.js
-├── tsconfig.json
-└── README.md
+│       ├── types.ts             # TypeScript types & constants
+│       ├── calculations.ts      # Business logic (hours, overtime, totals)
+│       ├── ocr-parser.ts        # OCR text → structured shift data
+│       ├── pdf-generator.ts     # PDF invoice generation
+│       └── excel-generator.ts   # Excel export
+├── tests/                       # Unit tests (Vitest)
+├── Dockerfile                   # Multi-stage production build
+├── docker-compose.yml
+├── Makefile                     # Common dev commands
+└── .github/workflows/ci.yml    # CI pipeline
 ```
 
-## Customization
+## Configuration
 
-### Change Your Details
-Edit `src/lib/types.ts`:
+### Company & Client Details
+
+Edit `src/lib/types.ts` to set your company info, client details, and rates:
 
 ```typescript
 export const COMPANY_DETAILS: CompanyDetails = {
-  name: 'YOUR NAME',
-  address: 'Your Address',
-  city: 'Your City',
-  postcode: 'Your Postcode',
-  phone: 'Your Phone',
-  email: 'your@email.com',
-  utr: 'Your UTR',
+  name: 'Your Company Name',
+  address: '123 Business Street',
+  city: 'London',
+  postcode: 'EC1A 1BB',
+  // ...
 };
-```
 
-### Change Rates
-Edit `src/lib/types.ts`:
-
-```typescript
 export const RATES = {
-  dailyRate: 140,    // Base daily rate
-  otRate: 14,        // Overtime hourly rate
-  standardHours: 10, // Hours before OT kicks in
+  dailyRate: 140,      // Base daily rate
+  otRate: 14,          // Overtime hourly rate
+  standardHours: 10,   // Hours before overtime kicks in
 };
 ```
 
-### Change Colors
-Edit `tailwind.config.js` to modify the color scheme.
+### Styling
 
-## Tech Stack
+Modify `tailwind.config.js` to customise the colour scheme and design tokens.
 
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **OCR**: Tesseract.js
-- **PDF**: jsPDF + jspdf-autotable
-- **Excel**: SheetJS (xlsx)
-- **Icons**: Lucide React
+## Development
 
-## Browser Support
+```bash
+make dev          # Start dev server
+make build        # Production build
+make type-check   # Run TypeScript compiler checks
+make lint         # Lint the codebase
+make test         # Run unit tests
+```
 
-Works on all modern browsers:
-- Chrome (recommended)
-- Firefox
-- Safari
-- Edge
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
-MIT License - Feel free to modify and use as needed.
-
----
-
-Built with ❤️ for Ahmed Waqas
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
