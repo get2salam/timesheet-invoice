@@ -6,6 +6,7 @@ import FileUploader from '@/components/FileUploader';
 import ShiftEditor from '@/components/ShiftEditor';
 import InvoicePreview from '@/components/InvoicePreview';
 import InvoiceSettings from '@/components/InvoiceSettings';
+import SummaryCards from '@/components/SummaryCards';
 import {
   ClientDetails,
   CompanyDetails,
@@ -222,6 +223,7 @@ export default function Home() {
               onRateSettingsChange={setRateSettings}
             />
             <ShiftEditor shifts={shifts} rateSettings={rateSettings} onShiftsChange={setShifts} roundHours={roundHours} onRoundHoursChange={setRoundHours} />
+            <SummaryCards shifts={shifts} currencySymbol={rateSettings.currencySymbol} grandTotal={invoiceData.grandTotal} />
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex flex-wrap gap-6 text-sm">
