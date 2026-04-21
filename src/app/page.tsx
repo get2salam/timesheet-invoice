@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { Eye, FileDown, FileSpreadsheet, PenLine, RefreshCw, Upload, CheckCircle } from 'lucide-react';
+import { Eye, FileDown, FileSpreadsheet, PenLine, RefreshCw, Upload, CheckCircle, TableProperties } from 'lucide-react';
 import FileUploader from '@/components/FileUploader';
 import ShiftEditor from '@/components/ShiftEditor';
 import InvoicePreview from '@/components/InvoicePreview';
@@ -27,6 +27,7 @@ import {
 import { parseTimesheetText, cleanOCRText } from '@/lib/ocr-parser';
 import { downloadPDF } from '@/lib/pdf-generator';
 import { downloadExcel } from '@/lib/excel-generator';
+import { downloadCsv } from '@/lib/csv-generator';
 import { clearInvoiceDraft, loadInvoiceDraft, saveInvoiceDraft } from '@/lib/storage';
 import { sortShiftsByDate } from '@/lib/validations';
 
@@ -158,6 +159,7 @@ export default function Home() {
 
   const handleDownloadPDF = () => downloadPDF(invoiceData, `invoice_${invoiceNumber.replace('/', '_')}`);
   const handleDownloadExcel = () => downloadExcel(invoiceData, `invoice_${invoiceNumber.replace('/', '_')}`);
+  const handleDownloadCsv = () => downloadCsv(invoiceData, `invoice_${invoiceNumber.replace('/', '_')}`);
   const handleSortShifts = () => setShifts((current) => sortShiftsByDate(current));
   const handleReset = () => {
     setShifts([]);
@@ -240,6 +242,7 @@ export default function Home() {
                 </div>
                 <div className="flex gap-3">
                   <button onClick={() => setShowPreview(!showPreview)} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"><Eye className="w-4 h-4" />{showPreview ? 'Hide' : 'Preview'}</button>
+                  <button onClick={handleDownloadCsv} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-slate-600 rounded-lg hover:bg-slate-700"><TableProperties className="w-4 h-4" />CSV</button>
                   <button onClick={handleDownloadExcel} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700"><FileSpreadsheet className="w-4 h-4" />Excel</button>
                   <button onClick={handleDownloadPDF} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-medium-blue rounded-lg hover:bg-royal-blue"><FileDown className="w-4 h-4" />PDF</button>
                 </div>
