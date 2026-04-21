@@ -215,12 +215,14 @@ export default function Home() {
               invoiceNumber={invoiceNumber}
               invoiceDate={invoiceDate}
               dueDate={dueDate}
+              notes={notes}
               companyDetails={companyDetails}
               clientDetails={clientDetails}
               rateSettings={rateSettings}
               onInvoiceNumberChange={setInvoiceNumber}
               onInvoiceDateChange={setInvoiceDate}
               onDueDateChange={setDueDate}
+              onNotesChange={setNotes}
               onCompanyDetailsChange={setCompanyDetails}
               onClientDetailsChange={setClientDetails}
               onRateSettingsChange={setRateSettings}

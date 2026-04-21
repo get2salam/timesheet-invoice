@@ -8,12 +8,14 @@ interface InvoiceSettingsProps {
   invoiceNumber: string;
   invoiceDate: string;
   dueDate: string;
+  notes: string;
   companyDetails: CompanyDetails;
   clientDetails: ClientDetails;
   rateSettings: RateSettings;
   onInvoiceNumberChange: (value: string) => void;
   onInvoiceDateChange: (value: string) => void;
   onDueDateChange: (value: string) => void;
+  onNotesChange: (value: string) => void;
   onCompanyDetailsChange: (value: CompanyDetails) => void;
   onClientDetailsChange: (value: ClientDetails) => void;
   onRateSettingsChange: (value: RateSettings) => void;
@@ -27,12 +29,14 @@ export default function InvoiceSettings({
   invoiceNumber,
   invoiceDate,
   dueDate,
+  notes,
   companyDetails,
   clientDetails,
   rateSettings,
   onInvoiceNumberChange,
   onInvoiceDateChange,
   onDueDateChange,
+  onNotesChange,
   onCompanyDetailsChange,
   onClientDetailsChange,
   onRateSettingsChange,
@@ -93,6 +97,16 @@ export default function InvoiceSettings({
               value={dueDate}
               onChange={(e) => onDueDateChange(e.target.value)}
               placeholder="Net 7 days"
+              className={inputClass}
+            />
+          </div>
+          <div className="md:col-span-2">
+            <label className={labelClass}>Invoice notes</label>
+            <textarea
+              value={notes}
+              onChange={(e) => onNotesChange(e.target.value)}
+              placeholder="Optional handoff notes, payment reminders, or thank-you message"
+              rows={4}
               className={inputClass}
             />
           </div>
