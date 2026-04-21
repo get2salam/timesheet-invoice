@@ -25,13 +25,14 @@ import {
 import { parseTimesheetText, cleanOCRText } from '@/lib/ocr-parser';
 import { downloadPDF } from '@/lib/pdf-generator';
 import { downloadExcel } from '@/lib/excel-generator';
+import { clearInvoiceDraft, loadInvoiceDraft, saveInvoiceDraft } from '@/lib/storage';
 
 export default function Home() {
   const [shifts, setShifts] = useState<ShiftEntry[]>([]);
   const [invoiceNumber, setInvoiceNumber] = useState(() => generateInvoiceNumber(1));
   const [invoiceDate, setInvoiceDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [dueDate, setDueDate] = useState('Upon Receipt');
-  const [notes] = useState('');
+  const [notes, setNotes] = useState('');
   const [companyDetails, setCompanyDetails] = useState<CompanyDetails>(DEFAULT_COMPANY_DETAILS);
   const [clientDetails, setClientDetails] = useState<ClientDetails>(DEFAULT_CLIENT_DETAILS);
   const [rateSettings, setRateSettings] = useState<RateSettings>(DEFAULT_RATE_SETTINGS);
@@ -40,6 +41,7 @@ export default function Home() {
   const [roundHours, setRoundHours] = useState(true);
   const [ocrStatus, setOcrStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [tesseractLoaded, setTesseractLoaded] = useState(false);
+  const [draftHydrated, setDraftHydrated] = useState(false);
 
   const totals = calculateInvoiceTotals(shifts, rateSettings);
   const invoiceData: InvoiceData = {
@@ -72,9 +74,40 @@ export default function Home() {
   }, [loadTesseract]);
 
   useEffect(() => {
+    const draft = loadInvoiceDraft();
+    if (draft) {
+      setInvoiceNumber(draft.invoiceNumber);
+      setInvoiceDate(draft.invoiceDate);
+      setDueDate(draft.dueDate);
+      setNotes(draft.notes);
+      setRoundHours(draft.roundHours);
+      setShifts(draft.shifts);
+      setCompanyDetails(draft.companyDetails);
+      setClientDetails(draft.clientDetails);
+      setRateSettings(draft.rateSettings);
+    }
+    setDraftHydrated(true);
+  }, []);
+
+  useEffect(() => {
     if (!shifts.length) return;
     setShifts((current) => recalculateShiftCollection(current, roundHours, rateSettings));
   }, [rateSettings]);
+
+  useEffect(() => {
+    if (!draftHydrated) return;
+    saveInvoiceDraft({
+      invoiceNumber,
+      invoiceDate,
+      dueDate,
+      notes,
+      roundHours,
+      shifts,
+      companyDetails,
+      clientDetails,
+      rateSettings,
+    });
+  }, [draftHydrated, invoiceNumber, invoiceDate, dueDate, notes, roundHours, shifts, companyDetails, clientDetails, rateSettings]);
 
   const processTimesheet = async (file: File) => {
     setIsProcessing(true);
@@ -126,6 +159,7 @@ export default function Home() {
     setShifts([]);
     setShowPreview(false);
     setOcrStatus('idle');
+    clearInvoiceDraft();
   };
   const hasShifts = shifts.length > 0;
 
