@@ -7,6 +7,7 @@ import ShiftEditor from '@/components/ShiftEditor';
 import InvoicePreview from '@/components/InvoicePreview';
 import InvoiceSettings from '@/components/InvoiceSettings';
 import SummaryCards from '@/components/SummaryCards';
+import ValidationPanel from '@/components/ValidationPanel';
 import {
   ClientDetails,
   CompanyDetails,
@@ -27,6 +28,7 @@ import { parseTimesheetText, cleanOCRText } from '@/lib/ocr-parser';
 import { downloadPDF } from '@/lib/pdf-generator';
 import { downloadExcel } from '@/lib/excel-generator';
 import { clearInvoiceDraft, loadInvoiceDraft, saveInvoiceDraft } from '@/lib/storage';
+import { sortShiftsByDate } from '@/lib/validations';
 
 export default function Home() {
   const [shifts, setShifts] = useState<ShiftEntry[]>([]);
@@ -156,6 +158,7 @@ export default function Home() {
 
   const handleDownloadPDF = () => downloadPDF(invoiceData, `invoice_${invoiceNumber.replace('/', '_')}`);
   const handleDownloadExcel = () => downloadExcel(invoiceData, `invoice_${invoiceNumber.replace('/', '_')}`);
+  const handleSortShifts = () => setShifts((current) => sortShiftsByDate(current));
   const handleReset = () => {
     setShifts([]);
     setShowPreview(false);
@@ -223,6 +226,7 @@ export default function Home() {
               onRateSettingsChange={setRateSettings}
             />
             <ShiftEditor shifts={shifts} rateSettings={rateSettings} onShiftsChange={setShifts} roundHours={roundHours} onRoundHoursChange={setRoundHours} />
+            <ValidationPanel shifts={shifts} onSortByDate={handleSortShifts} />
             <SummaryCards shifts={shifts} currencySymbol={rateSettings.currencySymbol} grandTotal={invoiceData.grandTotal} />
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
               <div className="flex flex-wrap items-center justify-between gap-4">
