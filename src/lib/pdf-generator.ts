@@ -25,7 +25,7 @@ export function generateInvoicePDF(data: InvoiceData): jsPDF {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
   doc.setTextColor(...lightBlue);
-  doc.text('Logistics & Freight Services', margin, 22);
+  doc.text('Independent contractor invoicing', margin, 22);
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(24);

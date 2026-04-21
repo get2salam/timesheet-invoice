@@ -15,7 +15,7 @@ export default function InvoicePreview({ data }: InvoicePreviewProps) {
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-2xl font-bold">{COMPANY_DETAILS.name}</h1>
-            <p className="text-light-blue text-sm mt-1">Logistics and Freight Services</p>
+            <p className="text-light-blue text-sm mt-1">Independent contractor invoicing</p>
           </div>
           <div className="text-right">
             <h2 className="text-3xl font-bold">INVOICE</h2>

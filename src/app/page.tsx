@@ -87,8 +87,8 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold">Timesheet Invoice Generator</h1>
-              <p className="text-light-blue text-sm mt-1">Upload your timesheet and generate professional invoices</p>
+              <h1 className="text-2xl font-bold">Shift Invoice Studio</h1>
+              <p className="text-light-blue text-sm mt-1">Turn work logs into clean, client-ready invoices in minutes</p>
             </div>
             {hasShifts && (<button onClick={handleReset} className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm"><RefreshCw className="w-4 h-4" />Start Over</button>)}
           </div>
@@ -99,8 +99,8 @@ export default function Home() {
           <div className="max-w-xl mx-auto">
             <div className="text-center mb-8">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-light-blue rounded-full mb-4"><Upload className="w-8 h-8 text-medium-blue" /></div>
-              <h2 className="text-xl font-semibold text-gray-800 mb-2">Upload Your Timesheet</h2>
-              <p className="text-gray-600">Take a photo or upload an image of your timesheet.</p>
+              <h2 className="text-xl font-semibold text-gray-800 mb-2">Upload a timesheet or build one manually</h2>
+              <p className="text-gray-600">Perfect for contractors, site supervisors, and warehouse teams.</p>
             </div>
             <FileUploader onFileSelect={processTimesheet} isProcessing={isProcessing} />
             
@@ -142,7 +142,7 @@ export default function Home() {
           </div>
         )}
       </main>
-      <footer className="py-6 text-center text-sm text-gray-500">Timesheet Invoice Generator • Built for Ahmed Waqas</footer>
+      <footer className="py-6 text-center text-sm text-gray-500">Shift Invoice Studio • A contractor-friendly invoicing workflow</footer>
     </div>
   );
 }

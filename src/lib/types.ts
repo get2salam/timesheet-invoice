@@ -44,24 +44,24 @@ export interface ClientDetails {
 }
 
 export const COMPANY_DETAILS: CompanyDetails = {
-  name: 'AHMED WAQAS',
-  address: '103 Apple Tree Ave',
-  city: 'Uxbridge',
-  postcode: 'UB8 3PX',
-  phone: '07429175660',
-  email: 'vickycbr8@gmail.com',
-  utr: '7038050927',
-  bankName: 'Starling',
-  accountName: 'Ahmed Waqas',
-  accountNumber: '42071515',
-  sortCode: '60-83-71',
+  name: 'Northline Contracting Ltd',
+  address: '14 Kingsway Business Park',
+  city: 'Manchester',
+  postcode: 'M1 4BT',
+  phone: '0161 555 0199',
+  email: 'accounts@northline.example',
+  utr: '0000000000',
+  bankName: 'Monzo Business',
+  accountName: 'Northline Contracting Ltd',
+  accountNumber: '12345678',
+  sortCode: '04-00-04',
 };
 
 export const CLIENT_DETAILS: ClientDetails = {
-  name: 'Heathrow Freight Services Ltd',
-  address: '202 Parlaunt Road',
-  city: 'Slough',
-  postcode: 'SL3 8AZ',
+  name: 'Riverstone Warehousing Group',
+  address: '88 Dockside Way',
+  city: 'Birmingham',
+  postcode: 'B5 6PP',
 };
 
 export const RATES = {

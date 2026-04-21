@@ -7,7 +7,7 @@ export function generateInvoiceExcel(data: InvoiceData): XLSX.WorkBook {
   const wsData: (string | number | null)[][] = [];
 
   wsData.push(['', COMPANY_DETAILS.name, '', '', '', '', '', 'INVOICE', '']);
-  wsData.push(['', 'Logistics & Freight Services', '', '', '', '', '', '', '']);
+  wsData.push(['', 'Independent contractor invoicing', '', '', '', '', '', '', '']);
   wsData.push(['', '', '', '', '', '', '', '', '']);
   wsData.push(['', 'FROM', '', '', '', '', 'Invoice No.', '', data.invoiceNumber]);
   wsData.push(['', `${COMPANY_DETAILS.address}, ${COMPANY_DETAILS.city}, ${COMPANY_DETAILS.postcode}`, '', '', '', '', 'Date', '', formatDate(data.invoiceDate)]);
