@@ -27,7 +27,7 @@ export function parseTimesheetText(text: string): ParsedTimesheet {
     const startTime = `${match[4].padStart(2, '0')}:${match[5]}`;
     const endTime = `${match[6].padStart(2, '0')}:${match[7]}`;
     const dateStr = `${year}-${month}-${day}`;
-    shifts.push(createShiftEntry('Protec 3', dateStr, startTime, endTime, true));
+    shifts.push(createShiftEntry('Shift', dateStr, startTime, endTime, true));
   }
 
   if (shifts.length === 0) {
@@ -40,7 +40,7 @@ export function parseTimesheetText(text: string): ParsedTimesheet {
         const year = m[3] ? (m[3].length === 2 ? `20${m[3]}` : m[3]) : currentYear.toString();
         const startTime = `${m[4].padStart(2, '0')}:${m[5]}`;
         const endTime = `${m[6].padStart(2, '0')}:${m[7]}`;
-        shifts.push(createShiftEntry('Protec 3', `${year}-${month}-${day}`, startTime, endTime, true));
+        shifts.push(createShiftEntry('Shift', `${year}-${month}-${day}`, startTime, endTime, true));
       }
     }
   }
