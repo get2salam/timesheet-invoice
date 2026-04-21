@@ -1,13 +1,12 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { InvoiceData } from './types';
-import { formatCurrency, formatDate } from './calculations';
+import { InvoiceData, COMPANY_DETAILS, CLIENT_DETAILS, RATES } from './types';
+import { formatDate, formatCurrency } from './calculations';
 
 export function generateInvoicePDF(data: InvoiceData): jsPDF {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 15;
-  const { companyDetails, clientDetails, rateSettings } = data;
 
   const royalBlue: [number, number, number] = [30, 58, 138];
   const mediumBlue: [number, number, number] = [59, 130, 246];
@@ -21,12 +20,12 @@ export function generateInvoicePDF(data: InvoiceData): jsPDF {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(20);
   doc.setTextColor(255, 255, 255);
-  doc.text(companyDetails.name, margin, 15);
+  doc.text(COMPANY_DETAILS.name, margin, 15);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
   doc.setTextColor(...lightBlue);
-  doc.text(companyDetails.tagline, margin, 22);
+  doc.text('Logistics & Freight Services', margin, 22);
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(24);
@@ -41,9 +40,9 @@ export function generateInvoicePDF(data: InvoiceData): jsPDF {
 
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...charcoal);
-  doc.text(`${companyDetails.address}, ${companyDetails.city}, ${companyDetails.postcode}`, margin, yPos + 5);
-  doc.text(`${companyDetails.phone} | ${companyDetails.email}`, margin, yPos + 9);
-  doc.text(`${companyDetails.taxLabel}# ${companyDetails.taxNumber}`, margin, yPos + 13);
+  doc.text(`${COMPANY_DETAILS.address}, ${COMPANY_DETAILS.city}, ${COMPANY_DETAILS.postcode}`, margin, yPos + 5);
+  doc.text(`${COMPANY_DETAILS.phone} | ${COMPANY_DETAILS.email}`, margin, yPos + 9);
+  doc.text(`UTR# ${COMPANY_DETAILS.utr}`, margin, yPos + 13);
 
   const boxX = pageWidth - margin - 60;
   doc.setFillColor(...lightBlue);
@@ -70,43 +69,31 @@ export function generateInvoicePDF(data: InvoiceData): jsPDF {
 
   doc.setTextColor(...charcoal);
   doc.setFontSize(10);
-  doc.text(clientDetails.name, margin, yPos + 5);
+  doc.text(CLIENT_DETAILS.name, margin, yPos + 5);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
-  doc.text(clientDetails.contactName, margin, yPos + 10);
-  doc.text(clientDetails.email, margin, yPos + 14);
-  doc.text(`${clientDetails.address}, ${clientDetails.city}, ${clientDetails.postcode}`, margin, yPos + 18);
+  doc.text(`${CLIENT_DETAILS.address}, ${CLIENT_DETAILS.city}, ${CLIENT_DETAILS.postcode}`, margin, yPos + 9);
 
-  const tableData = data.shifts.map((shift) => [
-    shift.description,
-    formatDate(shift.date),
-    shift.startTime,
-    shift.endTime,
-    shift.hours.toString(),
-    shift.otHours.toString(),
-    formatCurrency(shift.rate, rateSettings.currencySymbol),
-    formatCurrency(shift.amount, rateSettings.currencySymbol),
+  const tableData = data.shifts.map(shift => [
+    shift.description, formatDate(shift.date), shift.startTime, shift.endTime,
+    shift.hours.toString(), shift.otHours.toString(), formatCurrency(shift.rate), formatCurrency(shift.amount)
   ]);
 
   autoTable(doc, {
-    startY: 98,
+    startY: 90,
     head: [['DESCRIPTION', 'DATE', 'START', 'END', 'HRS', 'OT HRS', 'RATE', 'AMOUNT']],
     body: tableData,
     margin: { left: margin, right: margin },
     headStyles: { fillColor: mediumBlue, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8, halign: 'center' },
     bodyStyles: { fontSize: 8, textColor: charcoal },
     columnStyles: {
-      0: { halign: 'left', cellWidth: 25 },
-      1: { halign: 'center', cellWidth: 22 },
-      2: { halign: 'center', cellWidth: 18 },
-      3: { halign: 'center', cellWidth: 18 },
-      4: { halign: 'center', cellWidth: 15 },
-      5: { halign: 'center', cellWidth: 18 },
-      6: { halign: 'right', cellWidth: 20 },
-      7: { halign: 'right', cellWidth: 22 },
+      0: { halign: 'left', cellWidth: 25 }, 1: { halign: 'center', cellWidth: 22 },
+      2: { halign: 'center', cellWidth: 18 }, 3: { halign: 'center', cellWidth: 18 },
+      4: { halign: 'center', cellWidth: 15 }, 5: { halign: 'center', cellWidth: 18 },
+      6: { halign: 'right', cellWidth: 20 }, 7: { halign: 'right', cellWidth: 22 }
     },
     alternateRowStyles: { fillColor: [239, 246, 255] },
-    theme: 'plain',
+    theme: 'plain'
   });
 
   const finalY = (doc as any).lastAutoTable.finalY + 5;
@@ -114,27 +101,27 @@ export function generateInvoicePDF(data: InvoiceData): jsPDF {
   doc.setFont('helvetica', 'italic');
   doc.setFontSize(7);
   doc.setTextColor(...mediumGray);
-  doc.text(`* Overtime: Hours beyond ${rateSettings.standardHours}hrs @ ${formatCurrency(rateSettings.otRate, rateSettings.currencySymbol)}/hr`, margin, finalY);
+  doc.text(`* Overtime: Hours beyond ${RATES.standardHours}hrs @ £${RATES.otRate}/hr`, margin, finalY);
 
   const totalsX = pageWidth - margin - 70;
-  const totalsY = finalY + 10;
+  let totalsY = finalY + 10;
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
   doc.setTextColor(...mediumGray);
   doc.text(`Daily Total (${data.shifts.length} days)`, totalsX, totalsY);
   doc.setTextColor(...charcoal);
-  doc.text(formatCurrency(data.dailyTotal, rateSettings.currencySymbol), pageWidth - margin, totalsY, { align: 'right' });
+  doc.text(formatCurrency(data.dailyTotal), pageWidth - margin, totalsY, { align: 'right' });
 
   doc.setTextColor(...mediumGray);
   doc.text(`OT Total (${data.otHoursTotal} hrs)`, totalsX, totalsY + 5);
   doc.setTextColor(...charcoal);
-  doc.text(formatCurrency(data.otTotal, rateSettings.currencySymbol), pageWidth - margin, totalsY + 5, { align: 'right' });
+  doc.text(formatCurrency(data.otTotal), pageWidth - margin, totalsY + 5, { align: 'right' });
 
   doc.setTextColor(...mediumGray);
   doc.text('Tax (0%)', totalsX, totalsY + 10);
   doc.setTextColor(...charcoal);
-  doc.text(formatCurrency(data.tax, rateSettings.currencySymbol), pageWidth - margin, totalsY + 10, { align: 'right' });
+  doc.text(formatCurrency(data.tax), pageWidth - margin, totalsY + 10, { align: 'right' });
 
   doc.setFillColor(...royalBlue);
   doc.roundedRect(pageWidth - margin - 75, totalsY + 13, 75, 12, 2, 2, 'F');
@@ -143,8 +130,9 @@ export function generateInvoicePDF(data: InvoiceData): jsPDF {
   doc.setTextColor(255, 255, 255);
   doc.text('TOTAL DUE', pageWidth - margin - 70, totalsY + 21);
   doc.setFontSize(14);
-  doc.text(formatCurrency(data.grandTotal, rateSettings.currencySymbol), pageWidth - margin - 3, totalsY + 21, { align: 'right' });
+  doc.text(formatCurrency(data.grandTotal), pageWidth - margin - 3, totalsY + 21, { align: 'right' });
 
+  // Payment Details with Bank Info
   const paymentY = totalsY + 35;
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8);
@@ -157,25 +145,14 @@ export function generateInvoicePDF(data: InvoiceData): jsPDF {
   doc.text('Please make payment to:', margin, paymentY + 6);
 
   doc.setFontSize(8);
-  doc.text(`Bank: ${companyDetails.bankName}`, margin, paymentY + 12);
-  doc.text(`Account Name: ${companyDetails.accountName}`, margin, paymentY + 17);
-  doc.text(`Account Number: ${companyDetails.accountNumber}`, margin, paymentY + 22);
-  doc.text(`Sort Code: ${companyDetails.sortCode}`, margin, paymentY + 27);
-
-  if (data.notes) {
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...mediumBlue);
-    doc.text('NOTES', margin, paymentY + 37);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(...charcoal);
-    const noteLines = doc.splitTextToSize(data.notes, pageWidth - margin * 2);
-    doc.text(noteLines, margin, paymentY + 42);
-  }
+  doc.text(`Bank: ${COMPANY_DETAILS.bankName}`, margin, paymentY + 12);
+  doc.text(`Account Name: ${COMPANY_DETAILS.accountName}`, margin, paymentY + 17);
+  doc.text(`Account Number: ${COMPANY_DETAILS.accountNumber}`, margin, paymentY + 22);
+  doc.text(`Sort Code: ${COMPANY_DETAILS.sortCode}`, margin, paymentY + 27);
 
   doc.setFont('helvetica', 'italic');
   doc.setTextColor(...royalBlue);
-  const thanksY = data.notes ? paymentY + 52 : paymentY + 35;
-  doc.text('Thank you for your business!', margin, thanksY);
+  doc.text('Thank you for your business!', margin, paymentY + 35);
 
   return doc;
 }

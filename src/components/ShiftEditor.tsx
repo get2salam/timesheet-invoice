@@ -1,97 +1,76 @@
 'use client';
 
 import React from 'react';
-import { Clock, Plus, Trash2 } from 'lucide-react';
-import { RateSettings, ShiftEntry } from '@/lib/types';
-import { generateId, calculateShiftAmount, calculateOvertimeHours, calculateHours, recalculateShiftCollection, roundHoursToNearest } from '@/lib/calculations';
+import { Trash2, Plus, Clock } from 'lucide-react';
+import { ShiftEntry, RATES } from '@/lib/types';
+import { generateId, calculateHours, calculateOvertimeHours, calculateShiftAmount, roundHoursToNearest } from '@/lib/calculations';
 
 interface ShiftEditorProps {
   shifts: ShiftEntry[];
-  rateSettings: RateSettings;
   onShiftsChange: (shifts: ShiftEntry[]) => void;
   roundHours: boolean;
   onRoundHoursChange: (value: boolean) => void;
 }
 
-export default function ShiftEditor({ shifts, rateSettings, onShiftsChange, roundHours, onRoundHoursChange }: ShiftEditorProps) {
+export default function ShiftEditor({ shifts, onShiftsChange, roundHours, onRoundHoursChange }: ShiftEditorProps) {
+  const recalculateShift = (shift: ShiftEntry): ShiftEntry => {
+    let hours = calculateHours(shift.startTime, shift.endTime);
+    if (roundHours) hours = roundHoursToNearest(hours, 0.5);
+    const otHours = calculateOvertimeHours(hours);
+    const amount = calculateShiftAmount(hours, otHours);
+    return { ...shift, hours, otHours, amount };
+  };
+
   const updateShift = (id: string, field: keyof ShiftEntry, value: string | number) => {
-    const updatedShifts = shifts.map((shift) => {
+    const updatedShifts = shifts.map(shift => {
       if (shift.id !== id) return shift;
-      const updated = { ...shift, [field]: value } as ShiftEntry;
-
-      if (field === 'startTime' || field === 'endTime') {
-        let hours = calculateHours(updated.startTime, updated.endTime);
-        if (roundHours) hours = roundHoursToNearest(hours, 0.5);
-        const otHours = calculateOvertimeHours(hours, rateSettings);
-        return {
-          ...updated,
-          hours,
-          otHours,
-          rate: rateSettings.dailyRate,
-          amount: calculateShiftAmount(hours, otHours, rateSettings),
-        };
-      }
-
+      const updated = { ...shift, [field]: value };
+      if (field === 'startTime' || field === 'endTime') return recalculateShift(updated);
       if (field === 'hours') {
         const hours = Number(value);
-        const otHours = calculateOvertimeHours(hours, rateSettings);
-        return {
-          ...updated,
-          hours,
-          otHours,
-          rate: rateSettings.dailyRate,
-          amount: calculateShiftAmount(hours, otHours, rateSettings),
-        };
+        const otHours = calculateOvertimeHours(hours);
+        const amount = calculateShiftAmount(hours, otHours);
+        return { ...updated, hours, otHours, amount };
       }
-
       if (field === 'otHours') {
         const otHours = Number(value);
-        return {
-          ...updated,
-          otHours,
-          rate: rateSettings.dailyRate,
-          amount: calculateShiftAmount(updated.hours, otHours, rateSettings),
-        };
+        const amount = calculateShiftAmount(updated.hours, otHours);
+        return { ...updated, otHours, amount };
       }
-
       return updated;
     });
-
     onShiftsChange(updatedShifts);
   };
 
   const addShift = () => {
     const newShift: ShiftEntry = {
-      id: generateId(),
-      description: rateSettings.defaultShiftDescription,
-      date: new Date().toISOString().split('T')[0],
-      startTime: '06:00',
-      endTime: '16:00',
-      hours: rateSettings.standardHours,
-      otHours: 0,
-      rate: rateSettings.dailyRate,
-      amount: rateSettings.dailyRate,
+      id: generateId(), description: 'Protec 3', date: new Date().toISOString().split('T')[0],
+      startTime: '06:00', endTime: '16:00', hours: 10, otHours: 0, rate: RATES.dailyRate, amount: RATES.dailyRate
     };
     onShiftsChange([...shifts, newShift]);
   };
 
   const removeShift = (id: string) => {
-    if (shifts.length <= 1) {
-      alert('You must have at least one shift');
-      return;
-    }
-    onShiftsChange(shifts.filter((shift) => shift.id !== id));
+    if (shifts.length <= 1) { alert('You must have at least one shift'); return; }
+    onShiftsChange(shifts.filter(shift => shift.id !== id));
   };
 
   const handleRoundingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newRoundHours = e.target.checked;
     onRoundHoursChange(newRoundHours);
-    onShiftsChange(recalculateShiftCollection(shifts, newRoundHours, rateSettings));
+    const updatedShifts = shifts.map(shift => {
+      let hours = calculateHours(shift.startTime, shift.endTime);
+      if (newRoundHours) hours = roundHoursToNearest(hours, 0.5);
+      const otHours = calculateOvertimeHours(hours);
+      const amount = calculateShiftAmount(hours, otHours);
+      return { ...shift, hours, otHours, amount };
+    });
+    onShiftsChange(updatedShifts);
   };
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-      <div className="p-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center gap-4">
+      <div className="p-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
         <h3 className="font-semibold text-gray-800 flex items-center gap-2">
           <Clock className="w-5 h-5 text-medium-blue" />Shift Details
         </h3>
@@ -123,7 +102,7 @@ export default function ShiftEditor({ shifts, rateSettings, onShiftsChange, roun
                 <td className="px-3 py-2"><input type="time" value={shift.endTime} onChange={(e) => updateShift(shift.id, 'endTime', e.target.value)} className="w-full px-2 py-1 text-sm border border-gray-200 rounded text-center" /></td>
                 <td className="px-3 py-2"><input type="number" step="0.5" value={shift.hours} onChange={(e) => updateShift(shift.id, 'hours', e.target.value)} className="w-full px-2 py-1 text-sm border border-gray-200 rounded text-center" /></td>
                 <td className="px-3 py-2"><input type="number" step="0.5" value={shift.otHours} onChange={(e) => updateShift(shift.id, 'otHours', e.target.value)} className="w-full px-2 py-1 text-sm border border-gray-200 rounded text-center" /></td>
-                <td className="px-3 py-2 text-right"><span className="font-medium text-gray-800">{rateSettings.currencySymbol}{shift.amount.toFixed(2)}</span></td>
+                <td className="px-3 py-2 text-right"><span className="font-medium text-gray-800">£{shift.amount.toFixed(2)}</span></td>
                 <td className="px-3 py-2"><button onClick={() => removeShift(shift.id)} className="p-1 text-red-500 hover:bg-red-50 rounded"><Trash2 className="w-4 h-4" /></button></td>
               </tr>
             ))}

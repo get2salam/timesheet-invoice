@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Shift Invoice Studio',
-  description: 'Capture work logs, review shifts, and export polished contractor invoices.',
+  title: 'Timesheet Invoice Generator',
+  description: 'Upload timesheets and generate professional invoices automatically',
 };
 
 export default function RootLayout({

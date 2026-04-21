@@ -1,4 +1,4 @@
-import { RateSettings, ShiftEntry, RATES } from './types';
+import { ShiftEntry, RATES } from './types';
 
 export function generateId(): string {
   return Math.random().toString(36).substring(2, 9);
@@ -26,56 +26,26 @@ export function roundHoursToNearest(hours: number, nearest: number = 0.5): numbe
   return Math.round(hours / nearest) * nearest;
 }
 
-export function calculateOvertimeHours(totalHours: number, rates: RateSettings = RATES): number {
-  if (totalHours <= rates.standardHours) return 0;
-  return totalHours - rates.standardHours;
+export function calculateOvertimeHours(totalHours: number): number {
+  if (totalHours <= RATES.standardHours) return 0;
+  return totalHours - RATES.standardHours;
 }
 
-export function calculateShiftAmount(hours: number, otHours: number, rates: RateSettings = RATES): number {
-  const baseAmount = rates.dailyRate;
-  const otAmount = otHours * rates.otRate;
+export function calculateShiftAmount(hours: number, otHours: number): number {
+  const baseAmount = RATES.dailyRate;
+  const otAmount = otHours * RATES.otRate;
   return baseAmount + otAmount;
 }
 
-export function recalculateShiftEntry(
-  shift: ShiftEntry,
-  roundHrs: boolean,
-  rates: RateSettings = RATES,
-): ShiftEntry {
-  let hours = calculateHours(shift.startTime, shift.endTime);
-  if (roundHrs) hours = roundHoursToNearest(hours, 0.5);
-  const otHours = calculateOvertimeHours(hours, rates);
-  const amount = calculateShiftAmount(hours, otHours, rates);
-  return {
-    ...shift,
-    description: shift.description || rates.defaultShiftDescription,
-    hours,
-    otHours,
-    rate: rates.dailyRate,
-    amount,
-  };
-}
-
-export function recalculateShiftCollection(
-  shifts: ShiftEntry[],
-  roundHrs: boolean,
-  rates: RateSettings = RATES,
-): ShiftEntry[] {
-  return shifts.map((shift) => recalculateShiftEntry(shift, roundHrs, rates));
-}
-
-export function calculateInvoiceTotals(
-  shifts: ShiftEntry[],
-  rates: RateSettings = RATES,
-): {
+export function calculateInvoiceTotals(shifts: ShiftEntry[]): {
   dailyTotal: number;
   otHoursTotal: number;
   otTotal: number;
   grandTotal: number;
 } {
-  const dailyTotal = shifts.length * rates.dailyRate;
+  const dailyTotal = shifts.length * RATES.dailyRate;
   const otHoursTotal = shifts.reduce((sum, shift) => sum + shift.otHours, 0);
-  const otTotal = otHoursTotal * rates.otRate;
+  const otTotal = otHoursTotal * RATES.otRate;
   const grandTotal = dailyTotal + otTotal;
   return { dailyTotal, otHoursTotal, otTotal, grandTotal };
 }
@@ -85,21 +55,13 @@ export function createShiftEntry(
   date: string,
   startTime: string,
   endTime: string,
-  roundHrs: boolean = true,
-  rates: RateSettings = RATES,
+  roundHrs: boolean = true
 ): ShiftEntry {
-  const shift: ShiftEntry = {
-    id: generateId(),
-    description: description || rates.defaultShiftDescription,
-    date,
-    startTime,
-    endTime,
-    hours: 0,
-    otHours: 0,
-    rate: rates.dailyRate,
-    amount: 0,
-  };
-  return recalculateShiftEntry(shift, roundHrs, rates);
+  let hours = calculateHours(startTime, endTime);
+  if (roundHrs) hours = roundHoursToNearest(hours, 0.5);
+  const otHours = calculateOvertimeHours(hours);
+  const amount = calculateShiftAmount(hours, otHours);
+  return { id: generateId(), description, date, startTime, endTime, hours, otHours, rate: RATES.dailyRate, amount };
 }
 
 export function formatDate(dateStr: string): string {
@@ -110,8 +72,8 @@ export function formatDate(dateStr: string): string {
   return `${day}/${month}/${year}`;
 }
 
-export function formatCurrency(amount: number, symbol: string = RATES.currencySymbol): string {
-  return `${symbol}${amount.toFixed(2)}`;
+export function formatCurrency(amount: number): string {
+  return `£${amount.toFixed(2)}`;
 }
 
 export function getCurrentMonthPrefix(): string {
