@@ -23,11 +23,11 @@ export function getShiftValidationIssues(shifts: ShiftEntry[]): ShiftValidationI
     duplicateDates.set(shift.date, (duplicateDates.get(shift.date) || 0) + 1);
   });
 
-  for (const [date, count] of duplicateDates.entries()) {
+  duplicateDates.forEach((count, date) => {
     if (count > 1) {
       issues.push({ level: 'info', message: `${count} shifts share ${date}. Double-check if that is intentional.` });
     }
-  }
+  });
 
   shifts.forEach((shift) => {
     const computedHours = calculateHours(shift.startTime, shift.endTime);
