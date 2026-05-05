@@ -30,6 +30,12 @@ describe('parseTime', () => {
   it('handles single-digit hours', () => {
     expect(parseTime('7:00')).toEqual({ hours: 7, minutes: 0 });
   });
+
+  it('rejects out-of-range hours and minutes', () => {
+    expect(parseTime('25:00')).toBeNull();
+    expect(parseTime('12:60')).toBeNull();
+    expect(parseTime('99:99')).toBeNull();
+  });
 });
 
 describe('calculateHours', () => {
@@ -47,6 +53,11 @@ describe('calculateHours', () => {
 
   it('handles 12-hour shifts', () => {
     expect(calculateHours('06:00', '18:00')).toBe(12);
+  });
+
+  it('handles overnight shifts crossing midnight', () => {
+    expect(calculateHours('22:00', '06:00')).toBe(8);
+    expect(calculateHours('20:30', '04:00')).toBe(7.5);
   });
 });
 

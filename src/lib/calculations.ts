@@ -6,10 +6,11 @@ export function generateId(): string {
 
 export function parseTime(timeStr: string): { hours: number; minutes: number } | null {
   const match = timeStr.match(/(\d{1,2})[:\.](\d{2})/);
-  if (match) {
-    return { hours: parseInt(match[1]), minutes: parseInt(match[2]) };
-  }
-  return null;
+  if (!match) return null;
+  const hours = parseInt(match[1]);
+  const minutes = parseInt(match[2]);
+  if (hours > 23 || minutes > 59) return null;
+  return { hours, minutes };
 }
 
 export function calculateHours(startTime: string, endTime: string): number {
@@ -17,7 +18,10 @@ export function calculateHours(startTime: string, endTime: string): number {
   const end = parseTime(endTime);
   if (!start || !end) return 0;
   const startMinutes = start.hours * 60 + start.minutes;
-  const endMinutes = end.hours * 60 + end.minutes;
+  let endMinutes = end.hours * 60 + end.minutes;
+  // Treat an end time earlier than the start as the following day,
+  // so overnight shifts (e.g. 22:00–06:00) report a positive duration.
+  if (endMinutes < startMinutes) endMinutes += 24 * 60;
   const diffMinutes = endMinutes - startMinutes;
   return Math.round((diffMinutes / 60) * 100) / 100;
 }
