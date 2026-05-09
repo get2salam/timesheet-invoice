@@ -5,10 +5,13 @@ export function generateId(): string {
 }
 
 export function parseTime(timeStr: string): { hours: number; minutes: number } | null {
-  const match = timeStr.match(/(\d{1,2})[:\.](\d{2})/);
+  if (typeof timeStr !== 'string') return null;
+  // Anchor the pattern so embedded times in garbage input ("12:30 oops",
+  // "9:30:45") are rejected rather than silently parsed.
+  const match = timeStr.trim().match(/^(\d{1,2})[:\.](\d{2})$/);
   if (!match) return null;
-  const hours = parseInt(match[1]);
-  const minutes = parseInt(match[2]);
+  const hours = parseInt(match[1], 10);
+  const minutes = parseInt(match[2], 10);
   if (hours > 23 || minutes > 59) return null;
   return { hours, minutes };
 }

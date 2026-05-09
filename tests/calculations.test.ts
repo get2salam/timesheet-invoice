@@ -36,6 +36,18 @@ describe('parseTime', () => {
     expect(parseTime('12:60')).toBeNull();
     expect(parseTime('99:99')).toBeNull();
   });
+
+  it('trims surrounding whitespace', () => {
+    expect(parseTime('  09:30  ')).toEqual({ hours: 9, minutes: 30 });
+    expect(parseTime('\t14.45\n')).toEqual({ hours: 14, minutes: 45 });
+  });
+
+  it('rejects embedded or trailing garbage', () => {
+    expect(parseTime('12:30 oops')).toBeNull();
+    expect(parseTime('shift 09:30')).toBeNull();
+    expect(parseTime('09:30:45')).toBeNull();
+    expect(parseTime('12:30am')).toBeNull();
+  });
 });
 
 describe('calculateHours', () => {
