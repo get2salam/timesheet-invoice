@@ -96,6 +96,12 @@ describe('calculateOvertimeHours', () => {
     expect(calculateOvertimeHours(12)).toBe(2);
     expect(calculateOvertimeHours(11.5)).toBe(1.5);
   });
+
+  it('returns 0 for non-finite or negative inputs', () => {
+    expect(calculateOvertimeHours(NaN)).toBe(0);
+    expect(calculateOvertimeHours(Infinity)).toBe(0);
+    expect(calculateOvertimeHours(-5)).toBe(0);
+  });
 });
 
 describe('calculateShiftAmount', () => {
@@ -106,6 +112,11 @@ describe('calculateShiftAmount', () => {
   it('adds overtime pay', () => {
     const expected = RATES.dailyRate + 2 * RATES.otRate;
     expect(calculateShiftAmount(12, 2)).toBe(expected);
+  });
+
+  it('ignores non-finite or negative overtime', () => {
+    expect(calculateShiftAmount(8, NaN)).toBe(RATES.dailyRate);
+    expect(calculateShiftAmount(8, -3)).toBe(RATES.dailyRate);
   });
 });
 
@@ -129,6 +140,19 @@ describe('calculateInvoiceTotals', () => {
     expect(totals.otHoursTotal).toBe(0);
     expect(totals.otTotal).toBe(0);
     expect(totals.grandTotal).toBe(0);
+  });
+
+  it('skips non-finite overtime values without poisoning totals', () => {
+    const shifts = [
+      createShiftEntry('Shift', '2024-01-01', '08:00', '18:00', false),
+      { ...createShiftEntry('Shift', '2024-01-02', '08:00', '20:00', false), otHours: NaN },
+    ];
+    const totals = calculateInvoiceTotals(shifts);
+
+    expect(Number.isFinite(totals.grandTotal)).toBe(true);
+    expect(totals.dailyTotal).toBe(2 * RATES.dailyRate);
+    expect(totals.otHoursTotal).toBe(0);
+    expect(totals.grandTotal).toBe(totals.dailyTotal);
   });
 });
 

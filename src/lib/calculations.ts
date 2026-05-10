@@ -34,14 +34,13 @@ export function roundHoursToNearest(hours: number, nearest: number = 0.5): numbe
 }
 
 export function calculateOvertimeHours(totalHours: number): number {
-  if (totalHours <= RATES.standardHours) return 0;
+  if (!Number.isFinite(totalHours) || totalHours <= RATES.standardHours) return 0;
   return totalHours - RATES.standardHours;
 }
 
 export function calculateShiftAmount(hours: number, otHours: number): number {
-  const baseAmount = RATES.dailyRate;
-  const otAmount = otHours * RATES.otRate;
-  return baseAmount + otAmount;
+  const safeOtHours = Number.isFinite(otHours) && otHours > 0 ? otHours : 0;
+  return RATES.dailyRate + safeOtHours * RATES.otRate;
 }
 
 export function calculateInvoiceTotals(shifts: ShiftEntry[]): {
@@ -51,7 +50,10 @@ export function calculateInvoiceTotals(shifts: ShiftEntry[]): {
   grandTotal: number;
 } {
   const dailyTotal = shifts.length * RATES.dailyRate;
-  const otHoursTotal = shifts.reduce((sum, shift) => sum + shift.otHours, 0);
+  const otHoursTotal = shifts.reduce((sum, shift) => {
+    const ot = shift.otHours;
+    return sum + (Number.isFinite(ot) && ot > 0 ? ot : 0);
+  }, 0);
   const otTotal = otHoursTotal * RATES.otRate;
   const grandTotal = dailyTotal + otTotal;
   return { dailyTotal, otHoursTotal, otTotal, grandTotal };
