@@ -176,6 +176,12 @@ describe('formatDate', () => {
   it('formats ISO date to DD/MM/YYYY', () => {
     expect(formatDate('2024-01-15')).toBe('15/01/2024');
   });
+
+  it('returns an empty string for invalid or empty input', () => {
+    expect(formatDate('')).toBe('');
+    expect(formatDate('   ')).toBe('');
+    expect(formatDate('not-a-date')).toBe('');
+  });
 });
 
 describe('formatCurrency', () => {
@@ -183,6 +189,12 @@ describe('formatCurrency', () => {
     expect(formatCurrency(140)).toBe('£140.00');
     expect(formatCurrency(14.5)).toBe('£14.50');
     expect(formatCurrency(0)).toBe('£0.00');
+  });
+
+  it('falls back to £0.00 for non-finite values', () => {
+    expect(formatCurrency(NaN)).toBe('£0.00');
+    expect(formatCurrency(Infinity)).toBe('£0.00');
+    expect(formatCurrency(-Infinity)).toBe('£0.00');
   });
 });
 

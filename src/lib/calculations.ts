@@ -74,7 +74,11 @@ export function createShiftEntry(
 }
 
 export function formatDate(dateStr: string): string {
+  if (typeof dateStr !== 'string' || dateStr.trim() === '') return '';
   const date = new Date(dateStr);
+  // new Date('garbage') yields an Invalid Date whose getters return NaN; bail
+  // out so callers don't end up rendering "NaN/NaN/NaN" in invoices.
+  if (Number.isNaN(date.getTime())) return '';
   const day = date.getDate().toString().padStart(2, '0');
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
   const year = date.getFullYear();
@@ -82,7 +86,8 @@ export function formatDate(dateStr: string): string {
 }
 
 export function formatCurrency(amount: number): string {
-  return `£${amount.toFixed(2)}`;
+  const safe = Number.isFinite(amount) ? amount : 0;
+  return `£${safe.toFixed(2)}`;
 }
 
 export function getCurrentMonthPrefix(): string {
