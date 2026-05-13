@@ -66,6 +66,37 @@ describe('parseTimesheetText', () => {
     expect(result.shifts[0].startTime).toBe('08:00');
     expect(result.shifts[0].endTime).toBe('17:30');
   });
+
+  it('parses entries prefixed with weekday names and times without separators', () => {
+    const text = `
+      Mon 01/02/2024 0800 1730
+      Tue 02/02/24 09:00 18:00
+    `;
+
+    const result = parseTimesheetText(text);
+
+    expect(result.shifts.length).toBe(2);
+    expect(result.shifts[0].date).toBe('2024-02-01');
+    expect(result.shifts[0].startTime).toBe('08:00');
+    expect(result.shifts[0].endTime).toBe('17:30');
+    expect(result.shifts[1].date).toBe('2024-02-02');
+    expect(result.shifts[1].startTime).toBe('09:00');
+    expect(result.shifts[1].endTime).toBe('18:00');
+  });
+
+  it('skips entries whose date components are impossible calendar dates', () => {
+    // OCR misreads can yield out-of-range day/month values; we drop them
+    // instead of letting an Invalid Date poison the sort comparator.
+    const text = `
+      32/13/2024 08:00 17:00
+      15/03/2024 09:00 18:00
+    `;
+
+    const result = parseTimesheetText(text);
+
+    expect(result.shifts.length).toBe(1);
+    expect(result.shifts[0].date).toBe('2024-03-15');
+  });
 });
 
 describe('cleanOCRText', () => {

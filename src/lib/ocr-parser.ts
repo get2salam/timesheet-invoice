@@ -7,6 +7,24 @@ interface ParsedTimesheet {
   rawText: string;
 }
 
+// Build an ISO date string and reject impossible calendar dates (e.g. OCR
+// misreads producing "32/13/2024"). Returns null when the components don't
+// round-trip through Date, so callers can skip the entry instead of letting an
+// Invalid Date propagate into shift sorting.
+function buildIsoDate(day: string, month: string, year: string): string | null {
+  const iso = `${year}-${month}-${day}`;
+  const parsed = new Date(iso);
+  if (Number.isNaN(parsed.getTime())) return null;
+  if (
+    parsed.getUTCFullYear() !== parseInt(year, 10) ||
+    parsed.getUTCMonth() + 1 !== parseInt(month, 10) ||
+    parsed.getUTCDate() !== parseInt(day, 10)
+  ) {
+    return null;
+  }
+  return iso;
+}
+
 export function parseTimesheetText(text: string): ParsedTimesheet {
   const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
   const shifts: ShiftEntry[] = [];
@@ -26,22 +44,26 @@ export function parseTimesheetText(text: string): ParsedTimesheet {
     const year = match[3] ? (match[3].length === 2 ? `20${match[3]}` : match[3]) : currentYear.toString();
     const startTime = `${match[4].padStart(2, '0')}:${match[5]}`;
     const endTime = `${match[6].padStart(2, '0')}:${match[7]}`;
-    const dateStr = `${year}-${month}-${day}`;
+    const dateStr = buildIsoDate(day, month, year);
+    if (!dateStr) continue;
     shifts.push(createShiftEntry('Protec 3', dateStr, startTime, endTime, true));
   }
 
   if (shifts.length === 0) {
-    const dayPattern = /(?:mon|tue|wed|thu|fri|sat|sun)[a-z]*\s*(\d{1,2})[\\\/](\d{1,2})(?:[\\\/](\d{2,4}))?\s*(\d{1,2})[:\.]?(\d{2})\s*(\d{1,2})[:\.]?(\d{2})/gi;
+    // Per-line fallback: keep the regex non-global so String.match returns the
+    // capture groups (a /g regex would only yield the matched substring).
+    const dayPattern = /(?:mon|tue|wed|thu|fri|sat|sun)[a-z]*\s*(\d{1,2})[\\\/](\d{1,2})(?:[\\\/](\d{2,4}))?\s*(\d{1,2})[:\.]?(\d{2})\s*(\d{1,2})[:\.]?(\d{2})/i;
     for (const line of lines) {
       const m = line.match(dayPattern);
-      if (m) {
-        const day = m[1].padStart(2, '0');
-        const month = m[2].padStart(2, '0');
-        const year = m[3] ? (m[3].length === 2 ? `20${m[3]}` : m[3]) : currentYear.toString();
-        const startTime = `${m[4].padStart(2, '0')}:${m[5]}`;
-        const endTime = `${m[6].padStart(2, '0')}:${m[7]}`;
-        shifts.push(createShiftEntry('Protec 3', `${year}-${month}-${day}`, startTime, endTime, true));
-      }
+      if (!m) continue;
+      const day = m[1].padStart(2, '0');
+      const month = m[2].padStart(2, '0');
+      const year = m[3] ? (m[3].length === 2 ? `20${m[3]}` : m[3]) : currentYear.toString();
+      const startTime = `${m[4].padStart(2, '0')}:${m[5]}`;
+      const endTime = `${m[6].padStart(2, '0')}:${m[7]}`;
+      const dateStr = buildIsoDate(day, month, year);
+      if (!dateStr) continue;
+      shifts.push(createShiftEntry('Protec 3', dateStr, startTime, endTime, true));
     }
   }
 
