@@ -30,6 +30,10 @@ export function calculateHours(startTime: string, endTime: string): number {
 }
 
 export function roundHoursToNearest(hours: number, nearest: number = 0.5): number {
+  if (!Number.isFinite(hours)) return 0;
+  // A non-positive step would produce NaN (divide-by-zero) or invert the
+  // sign; fall back to the unrounded value so callers still get a sane number.
+  if (!Number.isFinite(nearest) || nearest <= 0) return hours;
   return Math.round(hours / nearest) * nearest;
 }
 
@@ -96,5 +100,8 @@ export function getCurrentMonthPrefix(): string {
 }
 
 export function generateInvoiceNumber(sequenceNumber: number = 1): string {
-  return `${getCurrentMonthPrefix()}/${sequenceNumber.toString().padStart(3, '0')}`;
+  // Guard against NaN/negative/fractional inputs that would otherwise emit
+  // malformed numbers like "MAY/NaN" or "MAY/0-1".
+  const seq = Number.isFinite(sequenceNumber) ? Math.max(1, Math.floor(sequenceNumber)) : 1;
+  return `${getCurrentMonthPrefix()}/${seq.toString().padStart(3, '0')}`;
 }

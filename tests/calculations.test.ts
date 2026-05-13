@@ -84,6 +84,18 @@ describe('roundHoursToNearest', () => {
     expect(roundHoursToNearest(8.1, 0.25)).toBe(8);
     expect(roundHoursToNearest(8.2, 0.25)).toBe(8.25);
   });
+
+  it('returns 0 for non-finite hours instead of propagating NaN', () => {
+    expect(roundHoursToNearest(NaN)).toBe(0);
+    expect(roundHoursToNearest(Infinity)).toBe(0);
+    expect(roundHoursToNearest(-Infinity)).toBe(0);
+  });
+
+  it('falls back to the unrounded value when the step is invalid', () => {
+    expect(roundHoursToNearest(8.3, 0)).toBe(8.3);
+    expect(roundHoursToNearest(8.3, -0.5)).toBe(8.3);
+    expect(roundHoursToNearest(8.3, NaN)).toBe(8.3);
+  });
 });
 
 describe('calculateOvertimeHours', () => {
@@ -207,5 +219,16 @@ describe('generateInvoiceNumber', () => {
   it('pads sequence number', () => {
     const invoiceNum = generateInvoiceNumber(42);
     expect(invoiceNum).toMatch(/^[A-Z]{3}\/042$/);
+  });
+
+  it('clamps non-positive or fractional sequences to a valid integer', () => {
+    expect(generateInvoiceNumber(0)).toMatch(/^[A-Z]{3}\/001$/);
+    expect(generateInvoiceNumber(-5)).toMatch(/^[A-Z]{3}\/001$/);
+    expect(generateInvoiceNumber(7.9)).toMatch(/^[A-Z]{3}\/007$/);
+  });
+
+  it('falls back to 001 when the sequence is non-finite', () => {
+    expect(generateInvoiceNumber(NaN)).toMatch(/^[A-Z]{3}\/001$/);
+    expect(generateInvoiceNumber(Infinity)).toMatch(/^[A-Z]{3}\/001$/);
   });
 });
