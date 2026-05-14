@@ -1,5 +1,5 @@
 import { ShiftEntry } from './types';
-import { createShiftEntry } from './calculations';
+import { createShiftEntry, parseTime } from './calculations';
 
 interface ParsedTimesheet {
   candidateName: string;
@@ -46,6 +46,10 @@ export function parseTimesheetText(text: string): ParsedTimesheet {
     const endTime = `${match[6].padStart(2, '0')}:${match[7]}`;
     const dateStr = buildIsoDate(day, month, year);
     if (!dateStr) continue;
+    // Skip entries with out-of-range times (e.g. OCR misreads "25:00" or
+    // "12:60"). createShiftEntry would otherwise produce a 0-hour shift still
+    // billed at RATES.dailyRate, silently invoicing for a phantom shift.
+    if (!parseTime(startTime) || !parseTime(endTime)) continue;
     shifts.push(createShiftEntry('Protec 3', dateStr, startTime, endTime, true));
   }
 
@@ -63,6 +67,7 @@ export function parseTimesheetText(text: string): ParsedTimesheet {
       const endTime = `${m[6].padStart(2, '0')}:${m[7]}`;
       const dateStr = buildIsoDate(day, month, year);
       if (!dateStr) continue;
+      if (!parseTime(startTime) || !parseTime(endTime)) continue;
       shifts.push(createShiftEntry('Protec 3', dateStr, startTime, endTime, true));
     }
   }

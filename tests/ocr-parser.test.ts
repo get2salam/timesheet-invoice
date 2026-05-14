@@ -97,6 +97,33 @@ describe('parseTimesheetText', () => {
     expect(result.shifts.length).toBe(1);
     expect(result.shifts[0].date).toBe('2024-03-15');
   });
+
+  it('skips entries whose times are out of range', () => {
+    // Without this guard, an out-of-range time would still produce a shift
+    // with 0 hours but billed at the daily rate — a phantom invoice line.
+    const text = `
+      01/03/2024 25:00 17:00
+      02/03/2024 08:00 12:60
+      03/03/2024 09:00 18:00
+    `;
+
+    const result = parseTimesheetText(text);
+
+    expect(result.shifts.length).toBe(1);
+    expect(result.shifts[0].date).toBe('2024-03-03');
+  });
+
+  it('skips weekday-prefixed entries whose times are out of range', () => {
+    const text = `
+      Mon 01/03/2024 2500 1700
+      Tue 02/03/2024 0900 1800
+    `;
+
+    const result = parseTimesheetText(text);
+
+    expect(result.shifts.length).toBe(1);
+    expect(result.shifts[0].date).toBe('2024-03-02');
+  });
 });
 
 describe('cleanOCRText', () => {
