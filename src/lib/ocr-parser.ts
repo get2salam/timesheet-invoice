@@ -80,7 +80,11 @@ export function cleanOCRText(text: string): string {
   return text
     .replace(/[|]/g, '')
     .replace(/\s+/g, ' ')
-    .replace(/[oO](?=\d)/g, '0')
-    .replace(/[lI](?=\d)/g, '1')
+    // Letter-to-digit corrections fire only when the letter sits adjacent to
+    // a real digit, so words like "of", "Ian", or "Bob" are left alone while
+    // misreads such as "o8:00", "12:0o", "1B:30", or "180B" are rescued.
+    .replace(/[oO](?=\d)|(?<=\d)[oO]/g, '0')
+    .replace(/[lI](?=\d)|(?<=\d)[lI]/g, '1')
+    .replace(/B(?=\d)|(?<=\d)B/g, '8')
     .trim();
 }

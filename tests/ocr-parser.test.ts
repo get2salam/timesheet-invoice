@@ -141,6 +141,23 @@ describe('cleanOCRText', () => {
     expect(cleanOCRText('I2:00')).toBe('12:00');
   });
 
+  it('corrects misreads where the letter sits after a digit', () => {
+    expect(cleanOCRText('8o:00')).toBe('80:00');
+    expect(cleanOCRText('1l:30')).toBe('11:30');
+    expect(cleanOCRText('2I:00')).toBe('21:00');
+  });
+
+  it('rewrites a stray B between or beside digits as 8', () => {
+    expect(cleanOCRText('1B:30')).toBe('18:30');
+    expect(cleanOCRText('0B:00')).toBe('08:00');
+    expect(cleanOCRText('180B')).toBe('1808');
+  });
+
+  it('leaves letters untouched when they are not adjacent to digits', () => {
+    expect(cleanOCRText('Bob says hello')).toBe('Bob says hello');
+    expect(cleanOCRText('Ian and Olive')).toBe('Ian and Olive');
+  });
+
   it('trims whitespace', () => {
     expect(cleanOCRText('  hello  ')).toBe('hello');
   });
