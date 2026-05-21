@@ -12,11 +12,17 @@ interface ParsedTimesheet {
 // round-trip through Date, so callers can skip the entry instead of letting an
 // Invalid Date propagate into shift sorting.
 function buildIsoDate(day: string, month: string, year: string): string | null {
+  const yearNum = parseInt(year, 10);
+  // Reject years outside a plausible timesheet range. A dropped leading digit
+  // ("2024" → "0024") still round-trips cleanly through Date but stamps shifts
+  // in year 24 CE; without this guard they slip past the calendar check and
+  // poison the sort order.
+  if (!Number.isFinite(yearNum) || yearNum < 2000 || yearNum > 2100) return null;
   const iso = `${year}-${month}-${day}`;
   const parsed = new Date(iso);
   if (Number.isNaN(parsed.getTime())) return null;
   if (
-    parsed.getUTCFullYear() !== parseInt(year, 10) ||
+    parsed.getUTCFullYear() !== yearNum ||
     parsed.getUTCMonth() + 1 !== parseInt(month, 10) ||
     parsed.getUTCDate() !== parseInt(day, 10)
   ) {

@@ -113,6 +113,22 @@ describe('parseTimesheetText', () => {
     expect(result.shifts[0].date).toBe('2024-03-03');
   });
 
+  it('skips entries whose year is outside a plausible timesheet range', () => {
+    // OCR can drop a leading digit on a four-digit year ("2024" → "0024"),
+    // and that round-trips cleanly through Date as year 24 CE. Without a
+    // range guard the resulting shift sorts to the front and prints with a
+    // nonsense date.
+    const text = `
+      01/03/0024 08:00 17:00
+      15/03/2024 09:00 18:00
+    `;
+
+    const result = parseTimesheetText(text);
+
+    expect(result.shifts.length).toBe(1);
+    expect(result.shifts[0].date).toBe('2024-03-15');
+  });
+
   it('skips weekday-prefixed entries whose times are out of range', () => {
     const text = `
       Mon 01/03/2024 2500 1700
