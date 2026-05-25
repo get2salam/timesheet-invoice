@@ -140,6 +140,32 @@ describe('parseTimesheetText', () => {
     expect(result.shifts.length).toBe(1);
     expect(result.shifts[0].date).toBe('2024-03-02');
   });
+
+  it('skips entries whose start and end times are identical', () => {
+    // OCR can duplicate the same HH:MM where two different times were intended;
+    // without this guard the 0-hour shift is still billed at the daily rate.
+    const text = `
+      01/03/2024 09:00 09:00
+      02/03/2024 09:00 18:00
+    `;
+
+    const result = parseTimesheetText(text);
+
+    expect(result.shifts.length).toBe(1);
+    expect(result.shifts[0].date).toBe('2024-03-02');
+  });
+
+  it('skips weekday-prefixed entries whose start and end times are identical', () => {
+    const text = `
+      Mon 01/03/2024 0900 0900
+      Tue 02/03/2024 0900 1800
+    `;
+
+    const result = parseTimesheetText(text);
+
+    expect(result.shifts.length).toBe(1);
+    expect(result.shifts[0].date).toBe('2024-03-02');
+  });
 });
 
 describe('cleanOCRText', () => {

@@ -56,6 +56,9 @@ export function parseTimesheetText(text: string): ParsedTimesheet {
     // "12:60"). createShiftEntry would otherwise produce a 0-hour shift still
     // billed at RATES.dailyRate, silently invoicing for a phantom shift.
     if (!parseTime(startTime) || !parseTime(endTime)) continue;
+    // Identical start and end yield a 0-hour shift that createShiftEntry would
+    // still bill at RATES.dailyRate — another phantom invoice line.
+    if (startTime === endTime) continue;
     shifts.push(createShiftEntry('Protec 3', dateStr, startTime, endTime, true));
   }
 
@@ -74,6 +77,7 @@ export function parseTimesheetText(text: string): ParsedTimesheet {
       const dateStr = buildIsoDate(day, month, year);
       if (!dateStr) continue;
       if (!parseTime(startTime) || !parseTime(endTime)) continue;
+      if (startTime === endTime) continue;
       shifts.push(createShiftEntry('Protec 3', dateStr, startTime, endTime, true));
     }
   }
