@@ -59,7 +59,11 @@ export function parseTimesheetText(text: string): ParsedTimesheet {
     // Identical start and end yield a 0-hour shift that createShiftEntry would
     // still bill at RATES.dailyRate — another phantom invoice line.
     if (startTime === endTime) continue;
-    shifts.push(createShiftEntry('Protec 3', dateStr, startTime, endTime, true));
+    const shift = createShiftEntry('Protec 3', dateStr, startTime, endTime, true);
+    // A sub-15-minute span (e.g. OCR misreading "08:00 18:00" as "08:00 08:10")
+    // rounds to 0 hours but is still billed at RATES.dailyRate. Drop it.
+    if (shift.hours <= 0) continue;
+    shifts.push(shift);
   }
 
   if (shifts.length === 0) {
@@ -78,7 +82,9 @@ export function parseTimesheetText(text: string): ParsedTimesheet {
       if (!dateStr) continue;
       if (!parseTime(startTime) || !parseTime(endTime)) continue;
       if (startTime === endTime) continue;
-      shifts.push(createShiftEntry('Protec 3', dateStr, startTime, endTime, true));
+      const shift = createShiftEntry('Protec 3', dateStr, startTime, endTime, true);
+      if (shift.hours <= 0) continue;
+      shifts.push(shift);
     }
   }
 

@@ -166,6 +166,32 @@ describe('parseTimesheetText', () => {
     expect(result.shifts.length).toBe(1);
     expect(result.shifts[0].date).toBe('2024-03-02');
   });
+
+  it('skips entries whose rounded duration is zero', () => {
+    // Sub-15-minute spans round to 0 hours but createShiftEntry would still
+    // bill RATES.dailyRate — another phantom invoice line we need to drop.
+    const text = `
+      01/03/2024 09:00 09:10
+      02/03/2024 09:00 18:00
+    `;
+
+    const result = parseTimesheetText(text);
+
+    expect(result.shifts.length).toBe(1);
+    expect(result.shifts[0].date).toBe('2024-03-02');
+  });
+
+  it('skips weekday-prefixed entries whose rounded duration is zero', () => {
+    const text = `
+      Mon 01/03/2024 0900 0910
+      Tue 02/03/2024 0900 1800
+    `;
+
+    const result = parseTimesheetText(text);
+
+    expect(result.shifts.length).toBe(1);
+    expect(result.shifts[0].date).toBe('2024-03-02');
+  });
 });
 
 describe('cleanOCRText', () => {
