@@ -83,9 +83,12 @@ export function formatDate(dateStr: string): string {
   // new Date('garbage') yields an Invalid Date whose getters return NaN; bail
   // out so callers don't end up rendering "NaN/NaN/NaN" in invoices.
   if (Number.isNaN(date.getTime())) return '';
-  const day = date.getDate().toString().padStart(2, '0');
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const year = date.getFullYear();
+  // Use UTC getters: new Date('2024-01-15') anchors to UTC midnight, so local
+  // getters shift the calendar day backwards in any negative-offset timezone
+  // (e.g. America/Los_Angeles would render '14/01/2024' for that input).
+  const day = date.getUTCDate().toString().padStart(2, '0');
+  const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+  const year = date.getUTCFullYear();
   return `${day}/${month}/${year}`;
 }
 

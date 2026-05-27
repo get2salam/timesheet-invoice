@@ -194,6 +194,26 @@ describe('formatDate', () => {
     expect(formatDate('   ')).toBe('');
     expect(formatDate('not-a-date')).toBe('');
   });
+
+  it('renders the same calendar day regardless of host timezone', () => {
+    // new Date('2024-01-15') anchors to UTC midnight, so naive local getters
+    // would shift the day backwards in any negative-offset zone. Simulate one
+    // by stubbing the prototype getters to return values one day earlier.
+    const proto = Date.prototype as unknown as Record<string, () => number>;
+    const realDate = proto.getDate;
+    const realMonth = proto.getMonth;
+    const realYear = proto.getFullYear;
+    proto.getDate = function () { return 14; };
+    proto.getMonth = function () { return 0; };
+    proto.getFullYear = function () { return 2024; };
+    try {
+      expect(formatDate('2024-01-15')).toBe('15/01/2024');
+    } finally {
+      proto.getDate = realDate;
+      proto.getMonth = realMonth;
+      proto.getFullYear = realYear;
+    }
+  });
 });
 
 describe('formatCurrency', () => {
