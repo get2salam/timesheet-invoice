@@ -34,6 +34,16 @@ function buildIsoDate(day: string, month: string, year: string): string | null {
 export function parseTimesheetText(text: string): ParsedTimesheet {
   const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
   const shifts: ShiftEntry[] = [];
+  // A worker cannot be on two shifts that share the same date, start, and end,
+  // so any repeat is either an OCR doubling of a row or a header echoed inside
+  // the data; without this guard we'd bill RATES.dailyRate for each copy.
+  const seenShiftKeys = new Set<string>();
+  const pushIfNew = (shift: ShiftEntry) => {
+    const key = `${shift.date}_${shift.startTime}_${shift.endTime}`;
+    if (seenShiftKeys.has(key)) return;
+    seenShiftKeys.add(key);
+    shifts.push(shift);
+  };
   let candidateName = '';
 
   const nameMatch = text.match(/CANDIDATE\s*NAME[:\s]*([A-Za-z\s]+?)(?:\s{2,}|WORK|EMAIL|$)/i);
@@ -63,7 +73,7 @@ export function parseTimesheetText(text: string): ParsedTimesheet {
     // A sub-15-minute span (e.g. OCR misreading "08:00 18:00" as "08:00 08:10")
     // rounds to 0 hours but is still billed at RATES.dailyRate. Drop it.
     if (shift.hours <= 0) continue;
-    shifts.push(shift);
+    pushIfNew(shift);
   }
 
   if (shifts.length === 0) {
@@ -84,7 +94,7 @@ export function parseTimesheetText(text: string): ParsedTimesheet {
       if (startTime === endTime) continue;
       const shift = createShiftEntry('Protec 3', dateStr, startTime, endTime, true);
       if (shift.hours <= 0) continue;
-      shifts.push(shift);
+      pushIfNew(shift);
     }
   }
 

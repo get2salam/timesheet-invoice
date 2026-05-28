@@ -192,6 +192,34 @@ describe('parseTimesheetText', () => {
     expect(result.shifts.length).toBe(1);
     expect(result.shifts[0].date).toBe('2024-03-02');
   });
+
+  it('drops duplicate shifts sharing the same date and times', () => {
+    // A worker cannot be on two shifts at the same time, so any repeat must be
+    // an OCR doubling. Without dedup we'd bill RATES.dailyRate for each copy.
+    const text = `
+      01/03/2024 09:00 18:00
+      01/03/2024 09:00 18:00
+      02/03/2024 09:00 18:00
+    `;
+
+    const result = parseTimesheetText(text);
+
+    expect(result.shifts.length).toBe(2);
+    expect(result.shifts.map(s => s.date)).toEqual(['2024-03-01', '2024-03-02']);
+  });
+
+  it('drops duplicate weekday-prefixed shifts in the fallback path', () => {
+    const text = `
+      Mon 01/03/2024 0900 1800
+      Mon 01/03/2024 0900 1800
+      Tue 02/03/2024 0900 1800
+    `;
+
+    const result = parseTimesheetText(text);
+
+    expect(result.shifts.length).toBe(2);
+    expect(result.shifts.map(s => s.date)).toEqual(['2024-03-01', '2024-03-02']);
+  });
 });
 
 describe('cleanOCRText', () => {
