@@ -13,13 +13,13 @@ lint:
 	npm run lint
 
 type-check:
-	npx tsc --noEmit
+	npm run typecheck
 
 test:
-	npx vitest run
+	npm test
 
 test-watch:
-	npx vitest
+	npm run test:watch
 
 docker-build:
 	docker build -t timesheet-invoice .
