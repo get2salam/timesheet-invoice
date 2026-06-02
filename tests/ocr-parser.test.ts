@@ -249,9 +249,16 @@ describe('cleanOCRText', () => {
     expect(cleanOCRText('180B')).toBe('1808');
   });
 
+  it('rewrites a stray S between or beside digits as 5', () => {
+    expect(cleanOCRText('1S:30')).toBe('15:30');
+    expect(cleanOCRText('08:0s')).toBe('08:05');
+    expect(cleanOCRText('S5:00')).toBe('55:00');
+  });
+
   it('leaves letters untouched when they are not adjacent to digits', () => {
     expect(cleanOCRText('Bob says hello')).toBe('Bob says hello');
     expect(cleanOCRText('Ian and Olive')).toBe('Ian and Olive');
+    expect(cleanOCRText('Sun Mon Tue')).toBe('Sun Mon Tue');
   });
 
   it('trims whitespace', () => {
