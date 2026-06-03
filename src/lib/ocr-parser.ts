@@ -49,7 +49,10 @@ export function parseTimesheetText(text: string): ParsedTimesheet {
   const nameMatch = text.match(/CANDIDATE\s*NAME[:\s]*([A-Za-z\s]+?)(?:\s{2,}|WORK|EMAIL|$)/i);
   if (nameMatch) candidateName = nameMatch[1].trim();
 
-  const dateTimePattern = /(\d{1,2})[\\\/](\d{1,2})(?:[\\\/](\d{2,4}))?\s*(\d{1,2})[:\.]?(\d{2})\s*(\d{1,2})[:\.]?(\d{2})/gi;
+  // Accept '/', '\\' and '-' as date separators: OCR often renders the slash
+  // on a printed timesheet as a dash, and DD-MM-YYYY is a common handwritten
+  // format. Without '-' those rows would silently fall through unparsed.
+  const dateTimePattern = /(\d{1,2})[-\\\/](\d{1,2})(?:[-\\\/](\d{2,4}))?\s*(\d{1,2})[:\.]?(\d{2})\s*(\d{1,2})[:\.]?(\d{2})/gi;
   const currentYear = new Date().getFullYear();
   const fullText = text.replace(/\n/g, ' ');
   let match;
@@ -79,7 +82,7 @@ export function parseTimesheetText(text: string): ParsedTimesheet {
   if (shifts.length === 0) {
     // Per-line fallback: keep the regex non-global so String.match returns the
     // capture groups (a /g regex would only yield the matched substring).
-    const dayPattern = /(?:mon|tue|wed|thu|fri|sat|sun)[a-z]*\s*(\d{1,2})[\\\/](\d{1,2})(?:[\\\/](\d{2,4}))?\s*(\d{1,2})[:\.]?(\d{2})\s*(\d{1,2})[:\.]?(\d{2})/i;
+    const dayPattern = /(?:mon|tue|wed|thu|fri|sat|sun)[a-z]*\s*(\d{1,2})[-\\\/](\d{1,2})(?:[-\\\/](\d{2,4}))?\s*(\d{1,2})[:\.]?(\d{2})\s*(\d{1,2})[:\.]?(\d{2})/i;
     for (const line of lines) {
       const m = line.match(dayPattern);
       if (!m) continue;
