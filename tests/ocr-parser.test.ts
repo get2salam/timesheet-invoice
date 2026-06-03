@@ -223,6 +223,42 @@ describe('parseTimesheetText', () => {
     expect(result.shifts[1].date).toBe('2024-03-02');
   });
 
+  it('parses time ranges separated by a hyphen or dash between start and end', () => {
+    // Printed and handwritten timesheets almost always write shifts as a
+    // range ("08:00-18:00" or "08:00 - 17:30"). Without an optional dash
+    // between the two times those rows would silently fall through unparsed.
+    const text = `
+      01/03/2024 08:00-18:00
+      02/03/2024 09:00 - 17:30
+      03/03/2024 07:00 – 16:30
+    `;
+
+    const result = parseTimesheetText(text);
+
+    expect(result.shifts.length).toBe(3);
+    expect(result.shifts[0].startTime).toBe('08:00');
+    expect(result.shifts[0].endTime).toBe('18:00');
+    expect(result.shifts[1].startTime).toBe('09:00');
+    expect(result.shifts[1].endTime).toBe('17:30');
+    expect(result.shifts[2].startTime).toBe('07:00');
+    expect(result.shifts[2].endTime).toBe('16:30');
+  });
+
+  it('parses weekday-prefixed entries with hyphenated time ranges in the fallback path', () => {
+    const text = `
+      Mon 01/03/2024 0800-1730
+      Tue 02/03/2024 09:00 - 18:00
+    `;
+
+    const result = parseTimesheetText(text);
+
+    expect(result.shifts.length).toBe(2);
+    expect(result.shifts[0].startTime).toBe('08:00');
+    expect(result.shifts[0].endTime).toBe('17:30');
+    expect(result.shifts[1].startTime).toBe('09:00');
+    expect(result.shifts[1].endTime).toBe('18:00');
+  });
+
   it('parses dash-separated dates with weekday prefixes in the fallback path', () => {
     const text = `
       Mon 01-03-2024 0800 1730
