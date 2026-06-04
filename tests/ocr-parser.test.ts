@@ -244,6 +244,40 @@ describe('parseTimesheetText', () => {
     expect(result.shifts[2].endTime).toBe('16:30');
   });
 
+  it('parses time ranges using the word "to" between start and end', () => {
+    // Handwritten timesheets frequently use the word "to" ("08:00 to 17:30")
+    // instead of a dash. Without this, those rows would silently drop because
+    // the start-time match would consume the digits but the separator gate
+    // would refuse the trailing "t".
+    const text = `
+      01/03/2024 08:00 to 17:30
+      02/03/2024 09:00 TO 18:00
+    `;
+
+    const result = parseTimesheetText(text);
+
+    expect(result.shifts.length).toBe(2);
+    expect(result.shifts[0].startTime).toBe('08:00');
+    expect(result.shifts[0].endTime).toBe('17:30');
+    expect(result.shifts[1].startTime).toBe('09:00');
+    expect(result.shifts[1].endTime).toBe('18:00');
+  });
+
+  it('parses weekday-prefixed entries using "to" between start and end', () => {
+    const text = `
+      Mon 01/03/2024 08:00 to 17:30
+      Tue 02/03/2024 09:00 TO 18:00
+    `;
+
+    const result = parseTimesheetText(text);
+
+    expect(result.shifts.length).toBe(2);
+    expect(result.shifts[0].startTime).toBe('08:00');
+    expect(result.shifts[0].endTime).toBe('17:30');
+    expect(result.shifts[1].startTime).toBe('09:00');
+    expect(result.shifts[1].endTime).toBe('18:00');
+  });
+
   it('parses weekday-prefixed entries with hyphenated time ranges in the fallback path', () => {
     const text = `
       Mon 01/03/2024 0800-1730
