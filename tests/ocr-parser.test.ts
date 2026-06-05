@@ -389,11 +389,19 @@ describe('cleanOCRText', () => {
     expect(cleanOCRText('Q5:00')).toBe('95:00');
   });
 
+  it('rewrites a stray z or Z between or beside digits as 2', () => {
+    expect(cleanOCRText('z5:00')).toBe('25:00');
+    expect(cleanOCRText('1Z:30')).toBe('12:30');
+    expect(cleanOCRText('08:0z')).toBe('08:02');
+    expect(cleanOCRText('1z:00')).toBe('12:00');
+  });
+
   it('leaves letters untouched when they are not adjacent to digits', () => {
     expect(cleanOCRText('Bob says hello')).toBe('Bob says hello');
     expect(cleanOCRText('Ian and Olive')).toBe('Ian and Olive');
     expect(cleanOCRText('Sun Mon Tue')).toBe('Sun Mon Tue');
     expect(cleanOCRText('Greg quit')).toBe('Greg quit');
+    expect(cleanOCRText('Zach and Liz')).toBe('Zach and Liz');
   });
 
   it('trims whitespace', () => {
