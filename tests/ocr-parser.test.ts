@@ -353,10 +353,18 @@ describe('cleanOCRText', () => {
     expect(cleanOCRText('S5:00')).toBe('55:00');
   });
 
+  it('rewrites a stray g or q between or beside digits as 9', () => {
+    expect(cleanOCRText('0g:00')).toBe('09:00');
+    expect(cleanOCRText('1q:30')).toBe('19:30');
+    expect(cleanOCRText('08:0g')).toBe('08:09');
+    expect(cleanOCRText('Q5:00')).toBe('95:00');
+  });
+
   it('leaves letters untouched when they are not adjacent to digits', () => {
     expect(cleanOCRText('Bob says hello')).toBe('Bob says hello');
     expect(cleanOCRText('Ian and Olive')).toBe('Ian and Olive');
     expect(cleanOCRText('Sun Mon Tue')).toBe('Sun Mon Tue');
+    expect(cleanOCRText('Greg quit')).toBe('Greg quit');
   });
 
   it('trims whitespace', () => {

@@ -114,12 +114,13 @@ export function cleanOCRText(text: string): string {
     .replace(/[|]/g, '')
     .replace(/\s+/g, ' ')
     // Letter-to-digit corrections fire only when the letter sits adjacent to
-    // a real digit, so words like "of", "Ian", "Bob", or "Sun" are left alone
-    // while misreads such as "o8:00", "12:0o", "1B:30", "180B", or "1S:30"
-    // are rescued.
+    // a real digit, so words like "of", "Ian", "Bob", "Sun", or "Greg" are
+    // left alone while misreads such as "o8:00", "12:0o", "1B:30", "180B",
+    // "1S:30", or "0g:00" are rescued.
     .replace(/[oO](?=\d)|(?<=\d)[oO]/g, '0')
     .replace(/[lI](?=\d)|(?<=\d)[lI]/g, '1')
     .replace(/B(?=\d)|(?<=\d)B/g, '8')
     .replace(/[sS](?=\d)|(?<=\d)[sS]/g, '5')
+    .replace(/[gqQ](?=\d)|(?<=\d)[gqQ]/g, '9')
     .trim();
 }
