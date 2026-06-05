@@ -49,14 +49,15 @@ export function parseTimesheetText(text: string): ParsedTimesheet {
   const nameMatch = text.match(/CANDIDATE\s*NAME[:\s]*([A-Za-z\s]+?)(?:\s{2,}|WORK|EMAIL|$)/i);
   if (nameMatch) candidateName = nameMatch[1].trim();
 
-  // Accept '/', '\\' and '-' as date separators: OCR often renders the slash
-  // on a printed timesheet as a dash, and DD-MM-YYYY is a common handwritten
-  // format. Without '-' those rows would silently fall through unparsed.
+  // Accept '/', '\\', '-' and '.' as date separators: OCR often renders the
+  // slash on a printed timesheet as a dash or dot, and DD-MM-YYYY and
+  // DD.MM.YYYY are both common handwritten formats. Without these those
+  // rows would silently fall through unparsed.
   // Between the start and end time, also tolerate a hyphen/dash range
   // separator ("08:00-18:00", "08:00 - 17:30") or the word "to"
   // ("08:00 to 17:30") since printed and handwritten shifts almost always
   // use one of these forms.
-  const dateTimePattern = /(\d{1,2})[-\\\/](\d{1,2})(?:[-\\\/](\d{2,4}))?\s*(\d{1,2})[:\.]?(\d{2})\s*(?:[-–—]|to)?\s*(\d{1,2})[:\.]?(\d{2})/gi;
+  const dateTimePattern = /(\d{1,2})[-\\\/.](\d{1,2})(?:[-\\\/.](\d{2,4}))?\s*(\d{1,2})[:\.]?(\d{2})\s*(?:[-–—]|to)?\s*(\d{1,2})[:\.]?(\d{2})/gi;
   const currentYear = new Date().getFullYear();
   const fullText = text.replace(/\n/g, ' ');
   let match;
@@ -86,7 +87,7 @@ export function parseTimesheetText(text: string): ParsedTimesheet {
   if (shifts.length === 0) {
     // Per-line fallback: keep the regex non-global so String.match returns the
     // capture groups (a /g regex would only yield the matched substring).
-    const dayPattern = /(?:mon|tue|wed|thu|fri|sat|sun)[a-z]*\s*(\d{1,2})[-\\\/](\d{1,2})(?:[-\\\/](\d{2,4}))?\s*(\d{1,2})[:\.]?(\d{2})\s*(?:[-–—]|to)?\s*(\d{1,2})[:\.]?(\d{2})/i;
+    const dayPattern = /(?:mon|tue|wed|thu|fri|sat|sun)[a-z]*\s*(\d{1,2})[-\\\/.](\d{1,2})(?:[-\\\/.](\d{2,4}))?\s*(\d{1,2})[:\.]?(\d{2})\s*(?:[-–—]|to)?\s*(\d{1,2})[:\.]?(\d{2})/i;
     for (const line of lines) {
       const m = line.match(dayPattern);
       if (!m) continue;

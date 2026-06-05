@@ -208,6 +208,35 @@ describe('parseTimesheetText', () => {
     expect(result.shifts.map(s => s.date)).toEqual(['2024-03-01', '2024-03-02']);
   });
 
+  it('parses dates separated by dots', () => {
+    // DD.MM.YYYY is a common European format, and OCR frequently renders
+    // the slash on a printed timesheet as a dot. Without dot support both
+    // would silently fall through unparsed.
+    const text = `
+      01.03.2024 08:00 17:00
+      02.03.24 09:00 18:00
+    `;
+
+    const result = parseTimesheetText(text);
+
+    expect(result.shifts.length).toBe(2);
+    expect(result.shifts[0].date).toBe('2024-03-01');
+    expect(result.shifts[1].date).toBe('2024-03-02');
+  });
+
+  it('parses dot-separated dates with weekday prefixes in the fallback path', () => {
+    const text = `
+      Mon 01.03.2024 0800 1730
+      Tue 02.03.24 0900 1800
+    `;
+
+    const result = parseTimesheetText(text);
+
+    expect(result.shifts.length).toBe(2);
+    expect(result.shifts[0].date).toBe('2024-03-01');
+    expect(result.shifts[1].date).toBe('2024-03-02');
+  });
+
   it('parses dates separated by dashes', () => {
     // OCR commonly renders the slash on a printed timesheet as a dash, and
     // handwritten timesheets frequently use DD-MM-YYYY. Both should parse.
