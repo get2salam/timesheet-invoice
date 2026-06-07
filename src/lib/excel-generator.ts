@@ -2,6 +2,17 @@ import * as XLSX from 'xlsx';
 import { InvoiceData, COMPANY_DETAILS, CLIENT_DETAILS, RATES } from './types';
 import { formatDate } from './calculations';
 
+// Prefix a single quote when an untrusted string starts with a character that
+// Excel, LibreOffice, and Numbers treat as a formula opener. Without this a
+// description like '=cmd|"/c calc"!A1' or a leading '+' / '-' / '@' / TAB / CR
+// would be evaluated when the recipient opens the workbook (CSV/spreadsheet
+// formula injection, OWASP). The quote tells the spreadsheet to render the
+// content as plain text.
+export function sanitizeSpreadsheetCell(value: string): string {
+  if (typeof value !== 'string' || value.length === 0) return value;
+  return /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+}
+
 export function generateInvoiceExcel(data: InvoiceData): XLSX.WorkBook {
   const wb = XLSX.utils.book_new();
   const wsData: (string | number | null)[][] = [];
@@ -9,7 +20,7 @@ export function generateInvoiceExcel(data: InvoiceData): XLSX.WorkBook {
   wsData.push(['', COMPANY_DETAILS.name, '', '', '', '', '', 'INVOICE', '']);
   wsData.push(['', 'Logistics & Freight Services', '', '', '', '', '', '', '']);
   wsData.push(['', '', '', '', '', '', '', '', '']);
-  wsData.push(['', 'FROM', '', '', '', '', 'Invoice No.', '', data.invoiceNumber]);
+  wsData.push(['', 'FROM', '', '', '', '', 'Invoice No.', '', sanitizeSpreadsheetCell(data.invoiceNumber)]);
   wsData.push(['', `${COMPANY_DETAILS.address}, ${COMPANY_DETAILS.city}, ${COMPANY_DETAILS.postcode}`, '', '', '', '', 'Date', '', formatDate(data.invoiceDate)]);
   wsData.push(['', `${COMPANY_DETAILS.phone} | ${COMPANY_DETAILS.email}`, '', '', '', '', 'Due Date', '', data.dueDate]);
   wsData.push(['', `UTR# ${COMPANY_DETAILS.utr}`, '', '', '', '', '', '', '']);
@@ -21,7 +32,7 @@ export function generateInvoiceExcel(data: InvoiceData): XLSX.WorkBook {
   wsData.push(['', 'DESCRIPTION', 'DATE', 'START', 'END', 'HRS', 'OT HRS', 'RATE', 'AMOUNT']);
 
   for (const shift of data.shifts) {
-    wsData.push(['', shift.description, formatDate(shift.date), shift.startTime, shift.endTime, shift.hours, shift.otHours, shift.rate, shift.amount]);
+    wsData.push(['', sanitizeSpreadsheetCell(shift.description), formatDate(shift.date), shift.startTime, shift.endTime, shift.hours, shift.otHours, shift.rate, shift.amount]);
   }
 
   wsData.push(['', '', '', '', '', '', '', '', '']);
