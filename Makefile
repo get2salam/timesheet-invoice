@@ -1,4 +1,4 @@
-.PHONY: dev build start lint type-check test docker-build docker-run clean
+.PHONY: dev build start lint type-check test test-watch verify docker-build docker-run docker-compose-up clean
 
 dev:
 	npm run dev
@@ -20,6 +20,9 @@ test:
 
 test-watch:
 	npm run test:watch
+
+verify:
+	npm run verify
 
 docker-build:
 	docker build -t timesheet-invoice .

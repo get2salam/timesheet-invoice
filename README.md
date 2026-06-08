@@ -136,7 +136,20 @@ make build        # Production build
 make type-check   # Run TypeScript compiler checks
 make lint         # Lint the codebase
 make test         # Run unit tests
+make verify       # Type-check and run tests (same checks CI runs)
 ```
+
+### Verifying changes locally
+
+Before opening a pull request, run the same checks CI runs:
+
+```bash
+npm run verify
+```
+
+This chains `npm run typecheck` and `npm test`, so a clean exit means TypeScript
+compiles and all 79 unit tests pass. CI also runs `npm run build` and a Docker
+image build on top of these.
 
 ## Contributing
 
