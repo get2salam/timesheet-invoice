@@ -151,6 +151,28 @@ This chains `npm run typecheck` and `npm test`, so a clean exit means TypeScript
 compiles and all 79 unit tests pass. CI also runs `npm run build` and a Docker
 image build on top of these.
 
+### Runnable sample week
+
+Use `examples/sample-week.json` as a copyable fixture for checking invoice math
+before wiring in your own timesheet export. It covers a standard 10-hour shift,
+one overtime shift, and an overnight shift that crosses midnight:
+
+```bash
+npm test -- tests/readme-example.test.ts
+```
+
+Expected totals for the sample are:
+
+| Metric | Value |
+| --- | ---: |
+| Daily total | £420.00 |
+| Overtime hours | 2.5 |
+| Overtime total | £35.00 |
+| Grand total | £455.00 |
+
+The test imports the JSON fixture and runs it through the same calculation
+helpers used by the app, so the documented example stays in sync with the code.
+
 ## Contributing
 
 1. Fork the repository

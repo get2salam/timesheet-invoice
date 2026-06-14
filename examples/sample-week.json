@@ -1,0 +1,20 @@
+[
+  {
+    "description": "Warehouse day shift",
+    "date": "2024-04-01",
+    "startTime": "08:00",
+    "endTime": "18:00"
+  },
+  {
+    "description": "Extended loading shift",
+    "date": "2024-04-02",
+    "startTime": "08:00",
+    "endTime": "20:30"
+  },
+  {
+    "description": "Overnight cover shift",
+    "date": "2024-04-03",
+    "startTime": "22:00",
+    "endTime": "06:00"
+  }
+]
