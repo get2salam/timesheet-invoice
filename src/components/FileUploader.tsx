@@ -2,6 +2,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { Upload, Image, X, Loader2 } from 'lucide-react';
+import { validateTimesheetImageFile } from '@/lib/file-validation';
 
 interface FileUploaderProps {
   onFileSelect: (file: File) => void;
@@ -33,7 +34,12 @@ export default function FileUploader({ onFileSelect, isProcessing }: FileUploade
   };
 
   const handleFile = (file: File) => {
-    if (!file.type.startsWith('image/')) { alert('Please upload an image file'); return; }
+    const validation = validateTimesheetImageFile(file);
+    if (!validation.ok) {
+      alert(validation.error);
+      return;
+    }
+
     setFileName(file.name);
     const reader = new FileReader();
     reader.onloadend = () => setPreview(reader.result as string);
@@ -50,7 +56,7 @@ export default function FileUploader({ onFileSelect, isProcessing }: FileUploade
           className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ${dragActive ? 'border-medium-blue bg-light-blue' : 'border-gray-300 hover:border-medium-blue hover:bg-sky-blue'}`}
           onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}
         >
-          <input type="file" accept="image/*" onChange={handleChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" disabled={isProcessing} />
+          <input type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png" onChange={handleChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" disabled={isProcessing} />
           <div className="flex flex-col items-center gap-4">
             <div className={`p-4 rounded-full ${dragActive ? 'bg-medium-blue' : 'bg-gray-100'}`}>
               <Upload className={`w-8 h-8 ${dragActive ? 'text-white' : 'text-gray-500'}`} />
@@ -59,7 +65,7 @@ export default function FileUploader({ onFileSelect, isProcessing }: FileUploade
               <p className="text-lg font-medium text-gray-700">Drop your timesheet here</p>
               <p className="text-sm text-gray-500 mt-1">or click to browse files</p>
             </div>
-            <p className="text-xs text-gray-400">Supports JPG, PNG, JPEG images</p>
+            <p className="text-xs text-gray-400">Supports JPG and PNG images up to 10 MB</p>
           </div>
         </div>
       ) : (
