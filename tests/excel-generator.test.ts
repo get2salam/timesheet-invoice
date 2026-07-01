@@ -68,4 +68,14 @@ describe('generateInvoiceExcel', () => {
     expect(cells.some(cell => cell.v.startsWith('='))).toBe(false);
     expect(cells.some(cell => cell.v === '\'=HYPERLINK("http://evil","click")')).toBe(true);
   });
+
+  it('sanitizes a formula-injection attempt in dueDate to prevent spreadsheet formula injection', () => {
+    const data = buildInvoice({ dueDate: '=HYPERLINK("http://evil","click")' });
+    const wb = generateInvoiceExcel(data);
+    const cells = Object.values(wb.Sheets.Invoice).filter(
+      (cell): cell is { v: string } => typeof cell === 'object' && cell !== null && 'v' in cell && typeof cell.v === 'string',
+    );
+    expect(cells.some(cell => cell.v.startsWith('='))).toBe(false);
+    expect(cells.some(cell => cell.v === '\'=HYPERLINK("http://evil","click")')).toBe(true);
+  });
 });

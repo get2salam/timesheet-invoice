@@ -22,7 +22,7 @@ export function generateInvoiceExcel(data: InvoiceData): XLSX.WorkBook {
   wsData.push(['', '', '', '', '', '', '', '', '']);
   wsData.push(['', 'FROM', '', '', '', '', 'Invoice No.', '', sanitizeSpreadsheetCell(data.invoiceNumber)]);
   wsData.push(['', `${COMPANY_DETAILS.address}, ${COMPANY_DETAILS.city}, ${COMPANY_DETAILS.postcode}`, '', '', '', '', 'Date', '', formatDate(data.invoiceDate)]);
-  wsData.push(['', `${COMPANY_DETAILS.phone} | ${COMPANY_DETAILS.email}`, '', '', '', '', 'Due Date', '', data.dueDate]);
+  wsData.push(['', `${COMPANY_DETAILS.phone} | ${COMPANY_DETAILS.email}`, '', '', '', '', 'Due Date', '', sanitizeSpreadsheetCell(data.dueDate)]);
   wsData.push(['', `UTR# ${COMPANY_DETAILS.utr}`, '', '', '', '', '', '', '']);
   wsData.push(['', '', '', '', '', '', '', '', '']);
   wsData.push(['', 'BILL TO', '', '', '', '', '', '', '']);
