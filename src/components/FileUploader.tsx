@@ -13,6 +13,7 @@ export default function FileUploader({ onFileSelect, isProcessing }: FileUploade
   const [dragActive, setDragActive] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string>('');
+  const [error, setError] = useState<string | null>(null);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -36,10 +37,11 @@ export default function FileUploader({ onFileSelect, isProcessing }: FileUploade
   const handleFile = (file: File) => {
     const validation = validateTimesheetImageFile(file);
     if (!validation.ok) {
-      alert(validation.error);
+      setError(validation.error ?? 'Please choose a valid timesheet image.');
       return;
     }
 
+    setError(null);
     setFileName(file.name);
     const reader = new FileReader();
     reader.onloadend = () => setPreview(reader.result as string);
@@ -47,32 +49,41 @@ export default function FileUploader({ onFileSelect, isProcessing }: FileUploade
     onFileSelect(file);
   };
 
-  const clearFile = () => { setPreview(null); setFileName(''); };
+  const clearFile = () => { setPreview(null); setFileName(''); setError(null); };
 
   return (
     <div className="w-full">
       {!preview ? (
         <div
-          className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ${dragActive ? 'border-medium-blue bg-light-blue' : 'border-gray-300 hover:border-medium-blue hover:bg-sky-blue'}`}
+          className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 focus-within:ring-2 focus-within:ring-medium-blue focus-within:ring-offset-2 ${dragActive ? 'border-medium-blue bg-light-blue' : 'border-gray-300 hover:border-medium-blue hover:bg-sky-blue'}`}
           onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}
         >
-          <input type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png" onChange={handleChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" disabled={isProcessing} />
+          <input
+            type="file"
+            accept="image/jpeg,image/png,.jpg,.jpeg,.png"
+            onChange={handleChange}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            disabled={isProcessing}
+            aria-label="Upload timesheet image"
+            aria-describedby="timesheet-upload-hint"
+            aria-invalid={error ? true : undefined}
+          />
           <div className="flex flex-col items-center gap-4">
             <div className={`p-4 rounded-full ${dragActive ? 'bg-medium-blue' : 'bg-gray-100'}`}>
-              <Upload className={`w-8 h-8 ${dragActive ? 'text-white' : 'text-gray-500'}`} />
+              <Upload className={`w-8 h-8 ${dragActive ? 'text-white' : 'text-gray-500'}`} aria-hidden="true" />
             </div>
             <div>
               <p className="text-lg font-medium text-gray-700">Drop your timesheet here</p>
               <p className="text-sm text-gray-500 mt-1">or click to browse files</p>
             </div>
-            <p className="text-xs text-gray-400">Supports JPG and PNG images up to 10 MB</p>
+            <p id="timesheet-upload-hint" className="text-xs text-gray-400">Supports JPG and PNG images up to 10 MB</p>
           </div>
         </div>
       ) : (
         <div className="relative border rounded-xl overflow-hidden bg-white shadow-sm">
           <div className="absolute top-2 right-2 z-10">
             {!isProcessing && (
-              <button onClick={clearFile} className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600"><X className="w-4 h-4" /></button>
+              <button onClick={clearFile} aria-label="Remove uploaded timesheet image" className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600"><X className="w-4 h-4" aria-hidden="true" /></button>
             )}
           </div>
           {isProcessing && (
@@ -91,6 +102,11 @@ export default function FileUploader({ onFileSelect, isProcessing }: FileUploade
             <img src={preview} alt="Timesheet preview" className="w-full h-auto max-h-[400px] object-contain rounded-lg" />
           </div>
         </div>
+      )}
+      {error && (
+        <p role="alert" aria-live="assertive" className="mt-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+          {error}
+        </p>
       )}
     </div>
   );
